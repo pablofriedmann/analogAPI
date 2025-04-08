@@ -41,6 +41,46 @@ AnalogAPI lets you interact with a database of analog gear—from your favorite 
 
 ---
 
+## 📚 Roadmap
+
+### Phase 1: MVP (In Progress)
+- [x] CRUD for Cameras & Films
+- [ ] Tags
+- [ ] Format-based compatibility
+- [ ] Recommendations
+- [ ] User Auth (JWT)
+- [ ] Favorites
+- [ ] Postman collection
+- [ ] Seed: 5 Cameras + 5 Films
+- [ ] Render Deployment
+
+### Phase 2: Data Expansion & Scraping
+- Manual scraping (Lomography, Film Photography Project)
+- Store source info (URL, date)
+- Add tech specs: shutter type, lens system, country, etc.
+- Endpoints `/scrape/films` and `/scrape/cameras`
+
+### Phase 3: User Experience
+- User collections
+- Comments / reviews
+- Kits (e.g., "Street Photography Kit")
+- History log (optional)
+
+### Phase 4: Scale & Community
+- Optional microservices
+- WebSocket features
+- OAuth2 (optional)
+- Export to JSON/CSV
+
+---
+
+## 📢 Contact
+
+Questions, feedback, collaborations??
+- GitHub: [@pablofriedmann](https://github.com/pablofriedmann)
+
+---
+
 ## Get started!
 
 ### Option 1: GitHub Codespaces
@@ -128,45 +168,6 @@ graph TD
 
 ---
 
-## 📚 Roadmap
-
-### Phase 1: MVP (In Progress)
-- [x] CRUD for Cameras & Films
-- [ ] Tags
-- [ ] Format-based compatibility
-- [ ] Recommendations
-- [ ] User Auth (JWT)
-- [ ] Favorites
-- [ ] Postman collection
-- [ ] Seed: 5 Cameras + 5 Films
-- [ ] Render Deployment
-
-### Phase 2: Data Expansion & Scraping
-- Manual scraping (Lomography, Film Photography Project)
-- Store source info (URL, date)
-- Add tech specs: shutter type, lens system, country, etc.
-- Endpoints `/scrape/films` and `/scrape/cameras`
-
-### Phase 3: User Experience
-- User collections
-- Comments / reviews
-- Kits (e.g., "Street Photography Kit")
-- History log (optional)
-
-### Phase 4: Scale & Community
-- Optional microservices
-- WebSocket features
-- OAuth2 (optional)
-- Export to JSON/CSV
-
----
-
-## 📢 Contact
-
-Questions, feedback, collaborations??
-- GitHub: [@pablofriedmann](https://github.com/pablofriedmann)
-
----
 
 > Made with love for film, chemistry, and clean code.
 
