@@ -55,7 +55,7 @@ AnalogAPI lets you interact with a database of analog gear—from your favorite 
 - [ ] Render Deployment
 
 ### Phase 2: Data Expansion & Scraping
-- Manual scraping (Lomography, Film Photography Project)
+- Manual scraping (e.g., Lomography, Film Photography Project)
 - Store source info (URL, date)
 - Add tech specs: shutter type, lens system, country, etc.
 - Endpoints `/scrape/films` and `/scrape/cameras`
@@ -63,8 +63,8 @@ AnalogAPI lets you interact with a database of analog gear—from your favorite 
 ### Phase 3: User Experience
 - User collections
 - Comments / reviews
-- Kits (e.g., "Street Photography Kit")
-- History log (optional)
+- Kits (e.g., "Street Photography Kit, Fashin Kit, Holidays Kit")
+- History log
 
 ### Phase 4: Scale & Community
 - Optional microservices
