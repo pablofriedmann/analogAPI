@@ -81,7 +81,7 @@ Questions, feedback, collaborations??
 
 ---
 
-## Get started!
+## How to use AnalogAPI! Get Started!
 
 ### Option 1: GitHub Codespaces
 
