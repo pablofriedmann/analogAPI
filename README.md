@@ -6,7 +6,7 @@
 **AnalogAPI** is a RESTful API lovingly crafted for analog photography lovers. Built as a backend portfolio project, it lets you explore and manage a collection of analog cameras and films, much like organizing your gear in a darkroom notebook. With full CRUD, tagging, relationships, and scraping in the roadmap, it's ready to grow.
 
 <p align="center">
-  <img src="analogAPI.svg" alt="AnalogAPI Logo" width="200" />
+  <img src="AnalogAPI.svg" alt="AnalogAPI Logo" width="200" />
 </p>
 
 ---
