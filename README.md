@@ -34,7 +34,8 @@ AnalogAPI lets you interact with a database of analog gear—from your favorite 
 
 - **Python**— Language for the backend <img src="https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=blue" />
 - **FastAPI** — Fast and modern web framework <img src="https://img.shields.io/badge/fastapi-109989?style=for-the-badge&logo=FASTAPI&logoColor=white" />
-- **PostgreSQL** + **SQLAlchemy** — Database & ORM <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" /> 
+- **PostgreSQL** + **SQLAlchemy** — Database & ORM <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" />  <img src="https://img.shields.io/badge/SQLAlchemy-D71F00?logo=sqlalchemy&logoColor=white" />
+
 - **Docker** — For containerized local setup <img src="https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white" />
 - **Swagger UI** — Auto-generated docs at `/docs` <img src="https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=Swagger&logoColor=white" />
 - **Pytest** — For testing endpoints
