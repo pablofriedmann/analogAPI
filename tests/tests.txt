@@ -1,0 +1,3 @@
+docker ps
+export TEST_DATABASE_URL=postgresql://user:password@localhost:5432/analogapi_test
+PYTHONPATH=$PYTHONPATH:/workspaces/analogAPI/src pytest --cov=src/analogapi tests/
