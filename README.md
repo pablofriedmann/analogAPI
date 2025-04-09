@@ -19,10 +19,10 @@ AnalogAPI lets you interact with a database of analog gear—from your favorite 
 
 - ✅ **CRUD for Cameras** - `/cameras`: Add, edit, browse, and remove analog cameras.
 - ✅ **CRUD for Films** - `/films`: Manage your favorite film stocks.
+- ✅ **Tagging System** - `/tags`: Add, edit, browse, and remove tags; associate tags with cameras and films.
 
 ### Upcoming Features
 
-- ☐ **Tagging System** for cameras and films
 - ☐ **Compatibility Logic** (e.g., 120 film for medium format cameras)
 - ☐ **Recommendations Endpoint** - `/recommendations`
 - ☐ **User Auth** (JWT): Register, login, and secure endpoints
@@ -46,7 +46,7 @@ AnalogAPI lets you interact with a database of analog gear—from your favorite 
 
 ### Phase 1: MVP (In Progress)
 - [x] CRUD for Cameras & Films
-- [ ] Tags
+- [x] Tags
 - [ ] Format-based compatibility
 - [ ] Recommendations
 - [ ] User Auth (JWT)
@@ -137,8 +137,12 @@ http://localhost:8000/docs
 ## 🔧 Running Tests
 
 ```bash
+# 1. Set the test database URL
 cd /workspaces/analogAPI
-PYTHONPATH=$PYTHONPATH:/workspaces/analogAPI/src pytest
+export TEST_DATABASE_URL=postgresql://user:password@localhost:5432/analogapi_test
+
+# 2. Run the tests with coverage
+PYTHONPATH=$PYTHONPATH:/workspaces/analogAPI/src pytest --cov=src/analogapi tests/
 ```
 
 ---
