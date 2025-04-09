@@ -1,10 +1,13 @@
 from pydantic import BaseModel, ConfigDict
-from typing import Optional
+from typing import List, Optional
 
-class TagCreate(BaseModel):
+class TagBase(BaseModel):
     name: str
 
-class TagOut(TagCreate):
+class TagCreate(TagBase):
+    pass
+
+class TagOut(TagBase):
     id: int
 
     model_config = ConfigDict(from_attributes=True)

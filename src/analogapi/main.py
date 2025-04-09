@@ -1,18 +1,16 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from analogapi.routers import camera, film, tag
-from analogapi.database import engine
-from analogapi.base import Base
+from .routers import camera, film, tag
+from .database import engine
+from .base import Base
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-
     try:
         Base.metadata.create_all(bind=engine)
     except Exception as e:
         raise Exception(f"Error al crear las tablas en la base de datos: {e}")
     yield
-   
 
 app = FastAPI(title="AnalogAPI", lifespan=lifespan)
 

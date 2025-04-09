@@ -3,18 +3,20 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import text
 import os
 from dotenv import load_dotenv
-from analogapi.base import Base
+from .base import Base
 
 load_dotenv()
 
 def get_engine(db_url=None):
-    load_dotenv()  
+    """Obtiene un engine para la URL de la base de datos proporcionada o la predeterminada."""
+    load_dotenv()
     url = db_url if db_url else os.getenv("TEST_DATABASE_URL", os.getenv("DATABASE_URL"))
     if not url:
         raise ValueError("No database URL provided and DATABASE_URL/TEST_DATABASE_URL not set")
     return create_engine(url)
 
 def get_session(db_url=None):
+    """Obtiene una sesión para la URL de la base de datos proporcionada o la predeterminada."""
     engine = get_engine(db_url)
     return sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -22,6 +24,7 @@ engine = None
 SessionLocal = None
 
 def initialize_engine_and_session(db_url=None):
+    """Inicializa o reinicializa el engine y la sesión global."""
     global engine, SessionLocal
     engine = get_engine(db_url)
     SessionLocal = get_session(db_url)
@@ -29,9 +32,10 @@ def initialize_engine_and_session(db_url=None):
 initialize_engine_and_session()
 
 def clear_database(db_url=None):
-    from analogapi.models.camera import Camera
-    from analogapi.models.film import Film
-    from analogapi.models.tag import Tag, camera_tags, film_tags
+    from .models.camera import Camera
+    from .models.film import Film
+    from .models.tag import Tag
+    from .tables import camera_tags, film_tags
 
     environment = os.getenv("ENVIRONMENT", "development")
     if environment == "production":
@@ -46,8 +50,6 @@ def clear_database(db_url=None):
         print(f"Tags before clearing: {count_before}")
 
         print("Tables to clear:", [table.name for table in Base.metadata.sorted_tables])
-
-
         for table in reversed(Base.metadata.sorted_tables):
             print(f"Deleting from table: {table.name}")
             db.execute(table.delete())
@@ -63,4 +65,4 @@ def clear_database(db_url=None):
         raise Exception(f"Error clearing database: {e}")
     finally:
         db.close()
-        temp_engine.dispose()  
+        temp_engine.dispose() 

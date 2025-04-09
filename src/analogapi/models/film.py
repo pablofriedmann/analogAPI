@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-from analogapi.base import Base
+from ..base import Base
+from ..tables import film_tags
 
 class Film(Base):
     __tablename__ = "films"
@@ -13,4 +14,4 @@ class Film(Base):
     iso = Column(Integer, nullable=False)
     grain = Column(String)
 
-    tags = relationship("Tag", secondary="film_tags", back_populates="films")
+    tags = relationship("Tag", secondary=film_tags, back_populates="films")

@@ -11,7 +11,7 @@ from src.analogapi.main import app
 
 client = TestClient(app)
 
-# CLEARS DB FOR TESTS
+# CLEAR DB FOR TESTS
 @pytest.fixture(autouse=True)
 def clear_db():
     test_db_url = os.getenv("TEST_DATABASE_URL")
@@ -19,7 +19,39 @@ def clear_db():
         raise ValueError("TEST_DATABASE_URL must be set for tests")
     clear_database(db_url=test_db_url)
 
+# PREDEFINED DATA
+@pytest.fixture
+def setup_data():
+    tag1_response = client.post("/tags/", json={"name": "SLR"})
+    assert tag1_response.status_code == 200, f"Failed to create tag 'SLR': {tag1_response.json()}"
+    tag2_response = client.post("/tags/", json={"name": "moda"})
+    assert tag2_response.status_code == 200, f"Failed to create tag 'moda': {tag2_response.json()}"
+    tag1_id = tag1_response.json()["id"]
+    tag2_id = tag2_response.json()["id"]
 
+    camera_response = client.post("/cameras/", json={
+        "brand": "Canon",
+        "model": "AE-1",
+        "format": "35mm",
+        "type": "SLR",
+        "years": "1976-1984",
+        "lens_mount": "Canon FD",
+        "tag_ids": [tag1_id, tag2_id]
+    })
+    assert camera_response.status_code == 200, f"Failed to create camera: {camera_response.json()}"
+
+    film_response = client.post("/films/", json={
+        "brand": "Kodak",
+        "name": "Portra 400",
+        "format": "35mm",
+        "type": "Color",
+        "iso": 400,
+        "grain": "Fine",
+        "tag_ids": [tag1_id]
+    })
+    assert film_response.status_code == 200, f"Failed to create film: {film_response.json()}"
+
+# EMPTY DB
 def test_database_is_empty():
     test_db_url = os.getenv("TEST_DATABASE_URL")
     session = get_session(test_db_url)()
@@ -72,6 +104,14 @@ def test_get_all_cameras():
     assert isinstance(cameras, list)
     assert len(cameras) > 0 
 
+# GET ALL CAMERAS WITH PREDEFINED DATA
+def test_get_all_cameras_with_tags(setup_data):
+    response = client.get("/cameras/")
+    assert response.status_code == 200
+    cameras = response.json()
+    assert len(cameras) == 1
+    assert len(cameras[0]["tags"]) == 2
+
 # GET CAMERA BY ID
 def test_get_camera_by_id():
     camera_data = {
@@ -91,6 +131,12 @@ def test_get_camera_by_id():
     assert response_data["brand"] == "Nikon"
     assert response_data["model"] == "F3"
     assert response_data["id"] == camera_id
+
+# GET CAMERA BY INVALID ID
+def test_get_camera_by_invalid_id():
+    response = client.get("/cameras/999")
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Camera not found"}
 
 # EDITS CAMERA
 def test_edit_camera():
@@ -175,6 +221,14 @@ def test_get_all_films():
     assert isinstance(films, list)
     assert len(films) > 0 
 
+# GET ALL FILMS WITH PREDEFINED DATA
+def test_get_all_films_with_tags(setup_data):
+    response = client.get("/films/")
+    assert response.status_code == 200
+    films = response.json()
+    assert len(films) == 1
+    assert len(films[0]["tags"]) == 1
+
 # GET FILM BY ID
 def test_get_film_by_id():
     film_data = {
@@ -194,6 +248,12 @@ def test_get_film_by_id():
     assert response_data["brand"] == "Fujifilm"
     assert response_data["name"] == "Superia 400"
     assert response_data["id"] == film_id
+
+# GET FILM BY INVALID ID
+def test_get_film_by_invalid_id():
+    response = client.get("/films/999")
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Film stock not found"}
 
 # EDIT FILM STOCK
 def test_edit_film():
@@ -242,6 +302,32 @@ def test_delete_film():
     response = client.get(f"/films/{film_id}")
     assert response.status_code == 404
 
+# CREATE FILM WITH INVALID ISO
+def test_create_film_invalid_iso():
+    film_data = {
+        "brand": "Kodak",
+        "name": "Portra 400",
+        "format": "35mm",
+        "type": "Color",
+        "iso": -400,  
+        "grain": "Fine"
+    }
+    response = client.post("/films/", json=film_data)
+    assert response.status_code == 422  
+    assert "greater than 0" in response.json()["detail"][0]["msg"]
+
+    film_data = {
+        "brand": "Kodak",
+        "name": "Portra 400",
+        "format": "35mm",
+        "type": "Color",
+        "iso": 0,
+        "grain": "Fine"
+    }
+    response = client.post("/films/", json=film_data)
+    assert response.status_code == 422  
+    assert "greater than 0" in response.json()["detail"][0]["msg"]
+
 # CREATE A TAG
 def test_create_tag():
     tag_data = {
@@ -252,6 +338,16 @@ def test_create_tag():
     response_data = response.json()
     assert response_data["name"] == "SLR"
     assert "id" in response_data  
+
+# CREATE TAG DUPLICATE
+def test_create_tag_duplicate():
+    tag_data = {"name": "SLR"}
+    response = client.post("/tags/", json=tag_data)
+    assert response.status_code == 200 
+
+    response = client.post("/tags/", json=tag_data)
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Tag already exists"}
 
 # GET ALL TAGS
 def test_get_all_tags():
@@ -281,6 +377,12 @@ def test_get_tag_by_id():
     response_data = response.json()
     assert response_data["name"] == "expired-friendly"
     assert response_data["id"] == tag_id
+
+# GET TAG BY INVALID ID
+def test_get_tag_by_invalid_id():
+    response = client.get("/tags/999")
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Tag not found"}
 
 # EDIT A TAG
 def test_edit_tag():
@@ -316,6 +418,30 @@ def test_delete_tag():
     response = client.get(f"/tags/{tag_id}")
     assert response.status_code == 404
 
+# DELETE TAG REMOVES ASSOCIATIONS
+def test_delete_tag_removes_associations():
+    tag_data = {"name": "SLR"}
+    tag_response = client.post("/tags/", json=tag_data)
+    tag_id = tag_response.json()["id"]
+
+    camera_data = {
+        "brand": "Canon",
+        "model": "AE-1",
+        "format": "35mm",
+        "type": "SLR",
+        "years": "1976-1984",
+        "lens_mount": "Canon FD",
+        "tag_ids": [tag_id]
+    }
+    camera_response = client.post("/cameras/", json=camera_data)
+    camera_id = camera_response.json()["id"]
+
+    client.delete(f"/tags/{tag_id}")
+
+    response = client.get(f"/cameras/{camera_id}")
+    assert response.status_code == 200
+    assert len(response.json()["tags"]) == 0
+
 # CREATE CAMERA W/TAGS
 def test_create_camera_with_tags():
     tag1_data = {"name": "SLR"}
@@ -342,6 +468,21 @@ def test_create_camera_with_tags():
     assert len(response_data["tags"]) == 2
     assert response_data["tags"][0]["id"] == tag1_id
     assert response_data["tags"][1]["id"] == tag2_id
+
+# CREATE CAMERA WITH INVALID TAG
+def test_create_camera_with_invalid_tag():
+    camera_data = {
+        "brand": "Canon",
+        "model": "AE-1",
+        "format": "35mm",
+        "type": "SLR",
+        "years": "1976-1984",
+        "lens_mount": "Canon FD",
+        "tag_ids": [999] 
+    }
+    response = client.post("/cameras/", json=camera_data)
+    assert response.status_code == 404
+    assert response.json() == {"detail": "One or more tags not found"}
 
 # CREATE FILM W/TAGS
 def test_create_film_with_tags():

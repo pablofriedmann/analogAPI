@@ -1,19 +1,22 @@
-from pydantic import BaseModel, ConfigDict
-from typing import Optional, List
-from .tag import TagOut
+from pydantic import BaseModel, Field, ConfigDict
+from typing import List, Optional
 
-class FilmCreate(BaseModel):
+class FilmBase(BaseModel):
     brand: str
     name: str
     format: str
     type: str
-    iso: int
-    grain: Optional[str] = None
-    tag_ids: Optional[List[int]] = None
-    
+    iso: int = Field(..., gt=0) 
+    grain: str
 
-class FilmOut(FilmCreate):
+class FilmCreate(FilmBase):
+    tag_ids: Optional[List[int]] = None
+
+class FilmOut(FilmBase):
     id: int
-    tags: List[TagOut] = []
+    tags: List["TagOut"] = []
 
     model_config = ConfigDict(from_attributes=True)
+
+from .tag import TagOut
+FilmOut.model_rebuild()
