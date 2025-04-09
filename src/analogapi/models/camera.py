@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String
-from analogapi.database import Base
+from sqlalchemy.orm import relationship
+from analogapi.base import Base
 
 class Camera(Base):
     __tablename__ = "cameras"
@@ -11,3 +12,5 @@ class Camera(Base):
     type = Column(String)
     years = Column(String)
     lens_mount = Column(String)
+
+    tags = relationship("Tag", secondary="camera_tags", back_populates="cameras")

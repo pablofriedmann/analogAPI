@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from analogapi.database import SessionLocal
 from analogapi.models.camera import Camera
+from analogapi.models.tag import Tag
 from analogapi.schemas.camera import CameraCreate, CameraOut
 
 router = APIRouter(prefix="/cameras", tags=["cameras"])
@@ -16,7 +17,14 @@ def get_db():
 # CREATES CAMERA
 @router.post("/", response_model=CameraOut)
 def create_camera(camera: CameraCreate, db: Session = Depends(get_db)):
-    db_camera = Camera(**camera.model_dump())
+    db_camera = Camera(**camera.model_dump(exclude={"tag_ids"}))
+    
+    if camera.tag_ids:
+        tags = db.query(Tag).filter(Tag.id.in_(camera.tag_ids)).all()
+        if len(tags) != len(camera.tag_ids):
+            raise HTTPException(status_code=404, detail="One or more tags not found")
+        db_camera.tags = tags
+    
     db.add(db_camera)
     db.commit()
     db.refresh(db_camera)
@@ -43,8 +51,14 @@ def edit_camera(camera_id: int, camera: CameraCreate, db: Session = Depends(get_
     if db_camera is None:
         raise HTTPException(status_code=404, detail="Camera not found")
     
-    for key, value in camera.model_dump().items():
+    for key, value in camera.model_dump(exclude={"tag_ids"}).items():
         setattr(db_camera, key, value)
+    
+    if camera.tag_ids is not None:
+        tags = db.query(Tag).filter(Tag.id.in_(camera.tag_ids)).all()
+        if len(tags) != len(camera.tag_ids):
+            raise HTTPException(status_code=404, detail="One or more tags not found")
+        db_camera.tags = tags
     
     db.commit()
     db.refresh(db_camera)

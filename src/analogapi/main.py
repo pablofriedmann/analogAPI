@@ -1,16 +1,24 @@
 from fastapi import FastAPI
-from analogapi.routers import camera, film
-from analogapi.database import Base, engine
+from contextlib import asynccontextmanager
+from analogapi.routers import camera, film, tag
+from analogapi.database import engine
+from analogapi.base import Base
 
-try:
-    Base.metadata.create_all(bind=engine)
-except Exception as e:
-    raise Exception(f"Error al crear las tablas en la base de datos: {e}")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
 
-app = FastAPI(title="AnalogAPI")
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        raise Exception(f"Error al crear las tablas en la base de datos: {e}")
+    yield
+   
+
+app = FastAPI(title="AnalogAPI", lifespan=lifespan)
 
 app.include_router(camera.router)
 app.include_router(film.router)
+app.include_router(tag.router)
 
 @app.get("/")
 def root():
