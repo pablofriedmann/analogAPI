@@ -11,4 +11,3 @@ class Camera(Base):
     type = Column(String)
     years = Column(String)
     lens_mount = Column(String)
-    notes = Column(String)

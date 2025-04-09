@@ -18,7 +18,6 @@ def test_create_camera():
         "type": "SLR",
         "years": "1976-1984",
         "lens_mount": "Canon FD",
-        "notes": "Classic film camera"
     }
     response = client.post("/cameras/", json=camera_data)
     assert response.status_code == 200
@@ -37,7 +36,6 @@ def test_get_all_cameras():
         "type": "SLR",
         "years": "1976-1997",
         "lens_mount": "Pentax K",
-        "notes": "Popular student camera"
     }
     client.post("/cameras/", json=camera_data)
 
@@ -58,7 +56,6 @@ def test_get_camera_by_id():
         "type": "SLR",
         "years": "1980-2000",
         "lens_mount": "Nikon F",
-        "notes": "Professional film camera"
     }
     create_response = client.post("/cameras/", json=camera_data)
     camera_id = create_response.json()["id"]
@@ -80,7 +77,6 @@ def test_edit_camera():
         "type": "SLR",
         "years": "1972-1987",
         "lens_mount": "Olympus OM",
-        "notes": "Compact film camera"
     }
     create_response = client.post("/cameras/", json=camera_data)
     camera_id = create_response.json()["id"]
@@ -93,12 +89,10 @@ def test_edit_camera():
         "type": "SLR",
         "years": "1972-1987",
         "lens_mount": "Olympus OM",
-        "notes": "Updated compact film camera"
     }
     response = client.put(f"/cameras/{camera_id}", json=updated_data)
     assert response.status_code == 200
     response_data = response.json()
-    assert response_data["notes"] == "Updated compact film camera"
     assert response_data["id"] == camera_id
 
 # DELETES CAMERA
@@ -111,7 +105,6 @@ def test_delete_camera():
         "type": "SLR",
         "years": "1981-1999",
         "lens_mount": "Minolta MD",
-        "notes": "Advanced film camera"
     }
     create_response = client.post("/cameras/", json=camera_data)
     camera_id = create_response.json()["id"]
@@ -122,4 +115,108 @@ def test_delete_camera():
 
 # GET DELETED CAMERA
     response = client.get(f"/cameras/{camera_id}")
+    assert response.status_code == 404
+
+# CREATE FILM
+def test_create_film():
+    film_data = {
+        "brand": "Kodak",
+        "name": "Portra 400",
+        "format": "35mm",
+        "type": "Color",
+        "iso": 400,
+        "grain": "Fine"
+    }
+    response = client.post("/films/", json=film_data)
+    assert response.status_code == 200
+    response_data = response.json()
+    assert response_data["brand"] == "Kodak"
+    assert response_data["name"] == "Portra 400"
+    assert "id" in response_data 
+
+# GET ALL FILM STCOK
+def test_get_all_films():
+
+    film_data = {
+        "brand": "Ilford",
+        "name": "HP5 Plus",
+        "format": "35mm",
+        "type": "B&W",
+        "iso": 400,
+        "grain": "Medium"
+    }
+    client.post("/films/", json=film_data)
+    response = client.get("/films/")
+    assert response.status_code == 200
+    films = response.json()
+    assert isinstance(films, list)
+    assert len(films) > 0 
+
+# GET FILM BY ID
+def test_get_film_by_id():
+
+    film_data = {
+        "brand": "Fujifilm",
+        "name": "Superia 400",
+        "format": "35mm",
+        "type": "Color",
+        "iso": 400,
+        "grain": "Fine"
+    }
+    create_response = client.post("/films/", json=film_data)
+    film_id = create_response.json()["id"]
+
+    response = client.get(f"/films/{film_id}")
+    assert response.status_code == 200
+    response_data = response.json()
+    assert response_data["brand"] == "Fujifilm"
+    assert response_data["name"] == "Superia 400"
+    assert response_data["id"] == film_id
+
+# EDIT FILM STOCK
+def test_edit_film():
+
+    film_data = {
+        "brand": "Kodak",
+        "name": "Tri-X 400",
+        "format": "35mm",
+        "type": "B&W",
+        "iso": 400,
+        "grain": "Medium"
+    }
+    create_response = client.post("/films/", json=film_data)
+    film_id = create_response.json()["id"]
+
+    updated_data = {
+        "brand": "Kodak",
+        "name": "Tri-X 400",
+        "format": "35mm",
+        "type": "B&W",
+        "iso": 400,
+        "grain": "Fine"
+    }
+    response = client.put(f"/films/{film_id}", json=updated_data)
+    assert response.status_code == 200
+    response_data = response.json()
+    assert response_data["grain"] == "Fine"
+    assert response_data["id"] == film_id
+
+# DELETE FILM
+def test_delete_film():
+    film_data = {
+        "brand": "Kodak",
+        "name": "Ektar 100",
+        "format": "35mm",
+        "type": "Color",
+        "iso": 100,
+        "grain": "Fine"
+    }
+    create_response = client.post("/films/", json=film_data)
+    film_id = create_response.json()["id"]
+
+    response = client.delete(f"/films/{film_id}")
+    assert response.status_code == 200
+    assert response.json() == {"message": f"Film stock with id {film_id} deleted successfully"}
+
+    response = client.get(f"/films/{film_id}")
     assert response.status_code == 404
