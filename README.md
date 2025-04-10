@@ -135,7 +135,7 @@ http://localhost:8000/docs
 
 ---
 
-##🌱 Seeding the Database
+## 🌱 Seeding the Database
 AnalogAPI includes a script to populate the database with initial data, which is useful for testing and demonstrations. The script inserts 5 cameras, 5 films, and 5 tags, along with their associations.
 
 To run the seed script:
