@@ -21,13 +21,14 @@ AnalogAPI lets you interact with a database of analog gear—from your favorite 
 - ✅ **CRUD for Films** - `/films`: Manage your favorite film stocks.
 - ✅ **Tagging System** - `/tags`: Add, edit, browse, and remove tags; associate tags with cameras and films.
 - ✅ **Format-based Compatibility** - `/cameras/{id}/compatible-films` and `/films/{id}/compatible-cameras`: Find films compatible with a camera or cameras compatible with a film based on format.
+- ✅ **Recommendations Endpoint** - `/recommendations`: Suggest cameras and films based on user preferences (e.g., favorite photography type, preferred format, color preference).  
+- ✅ **User Auth (JWT)**: Register, login, and secure endpoints with JWT authentication (`/users/register`, `/users/login`, `/users/me`, `/users/preferences`).
 
 ### Upcoming Features
 
-- ☐ **Compatibility Logic** (e.g., 120 film for medium format cameras)
-- ☐ **Recommendations Endpoint** - `/recommendations`
-- ☐ **User Auth** (JWT): Register, login, and secure endpoints
-- ☐ **Favorites**: Let users collect what they love
+☐ **Compatibility Logic** (e.g., 120 film for medium format cameras): Enhance compatibility logic beyond format matching.  
+☐ **Favorites**: Let users collect what they love by marking cameras and films as favorites.  
+☐ **Preferences Enhancement**: Add predefined options for `favorite_photography_type` (e.g., `portrait`, `street`, `nature`, `animals`, `landscapes`, `fashion`, etc.).
 
 ---
 
@@ -50,8 +51,8 @@ AnalogAPI lets you interact with a database of analog gear—from your favorite 
 - [x] Tags
 - [x] Format-based compatibility
 - [x] Seed: 5 Cameras + 5 Films
-- [ ] Recommendations
-- [ ] User Auth (JWT)
+- [x] Recommendations
+- [x] User Auth (JWT)
 - [ ] Favorites
 - [ ] Postman collection
 - [ ] Render Deployment
