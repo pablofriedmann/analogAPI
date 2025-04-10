@@ -20,6 +20,7 @@ AnalogAPI lets you interact with a database of analog gear—from your favorite 
 - ✅ **CRUD for Cameras** - `/cameras`: Add, edit, browse, and remove analog cameras.
 - ✅ **CRUD for Films** - `/films`: Manage your favorite film stocks.
 - ✅ **Tagging System** - `/tags`: Add, edit, browse, and remove tags; associate tags with cameras and films.
+- ✅ **Format-based Compatibility** - `/cameras/{id}/compatible-films` and `/films/{id}/compatible-cameras`: Find films compatible with a camera or cameras compatible with a film based on format.
 
 ### Upcoming Features
 
@@ -47,12 +48,12 @@ AnalogAPI lets you interact with a database of analog gear—from your favorite 
 ### Phase 1: MVP (In Progress)
 - [x] CRUD for Cameras & Films
 - [x] Tags
-- [ ] Format-based compatibility
+- [x] Format-based compatibility
+- [x] Seed: 5 Cameras + 5 Films
 - [ ] Recommendations
 - [ ] User Auth (JWT)
 - [ ] Favorites
 - [ ] Postman collection
-- [ ] Seed: 5 Cameras + 5 Films
 - [ ] Render Deployment
 
 ### Phase 2: Data Expansion & Scraping
@@ -133,6 +134,15 @@ http://localhost:8000/docs
 ```
 
 ---
+
+##🌱 Seeding the Database
+AnalogAPI includes a script to populate the database with initial data, which is useful for testing and demonstrations. The script inserts 5 cameras, 5 films, and 5 tags, along with their associations.
+
+To run the seed script:
+```bash
+cd src
+python -m analogapi.seed
+```
 
 ## 🔧 Running Tests
 
