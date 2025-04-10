@@ -1,3 +1,4 @@
+import os
 from sqlalchemy.orm import Session
 from .database import get_engine, get_session, SessionLocal
 from .models.camera import Camera
@@ -5,20 +6,19 @@ from .models.film import Film
 from .models.tag import Tag
 from .tables import camera_tags, film_tags
 from sqlalchemy.sql import text
+from .base import Base  #
 
 def seed_database(db_url=None, clear=True):
-    """Pobla la base de datos con datos iniciales: 5 cámaras, 5 películas y algunos tags.
-
-    Args:
-        db_url (str, optional): URL de la base de datos a poblar. Si no se proporciona, usa DATABASE_URL.
-        clear (bool, optional): Si es True, limpia la base de datos antes de insertar los datos. Default: True.
-    """
+    
     engine = get_engine(db_url)
     SessionLocal = get_session(db_url)
     db = SessionLocal()
 
     try:
         print("Seeding database...")
+
+        print("Creating tables if they don't exist...")
+        Base.metadata.create_all(bind=engine)
 
         if clear:
             print("Clearing database before seeding...")
@@ -32,7 +32,7 @@ def seed_database(db_url=None, clear=True):
                 db.add(Tag(name=name))
         db.commit()
 
-        # Crear cámaras si no existen
+        # SEEDS CAMERAS
         cameras_data = [
             {"brand": "Canon", "model": "AE-1", "format": "35mm", "type": "SLR", "years": "1976-1984", "lens_mount": "Canon FD"},
             {"brand": "Nikon", "model": "F3", "format": "35mm", "type": "SLR", "years": "1980-2000", "lens_mount": "Nikon F"},
@@ -45,6 +45,7 @@ def seed_database(db_url=None, clear=True):
                 db.add(Camera(**camera_data))
         db.commit()
 
+        # ASSOCIATE TAGS/CAMERAS
         tag_slr = db.query(Tag).filter(Tag.name == "SLR").first()
         tag_medium_format = db.query(Tag).filter(Tag.name == "Medium Format").first()
 
@@ -66,6 +67,7 @@ def seed_database(db_url=None, clear=True):
             mamiya_rb67.tags.append(tag_medium_format)
         db.commit()
 
+        # SEEDS FILM
         films_data = [
             {"brand": "Kodak", "name": "Portra 400", "format": "35mm", "type": "Color", "iso": 400, "grain": "Fine"},
             {"brand": "Ilford", "name": "HP5 Plus", "format": "35mm", "type": "B&W", "iso": 400, "grain": "Medium"},
@@ -78,6 +80,7 @@ def seed_database(db_url=None, clear=True):
                 db.add(Film(**film_data))
         db.commit()
 
+        # TAG ASSOCIATION
         tag_color = db.query(Tag).filter(Tag.name == "Color").first()
         tag_bw = db.query(Tag).filter(Tag.name == "B&W").first()
         tag_portrait = db.query(Tag).filter(Tag.name == "Portrait").first()

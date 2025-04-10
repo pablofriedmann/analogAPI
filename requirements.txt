@@ -6,3 +6,7 @@ python-dotenv
 pydantic
 pytest
 httpx
+passlib[bcrypt]
+python-jose
+email-validator>=2.0.0
+python-multipart>=0.0.12

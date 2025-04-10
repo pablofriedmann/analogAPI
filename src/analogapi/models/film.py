@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-from ..base import Base
+from ..database import Base  
 from ..tables import film_tags
 
 class Film(Base):

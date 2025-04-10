@@ -1,35 +1,77 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.sql import text
 import os
+import time
 from dotenv import load_dotenv
-from .base import Base
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.exc import OperationalError
 
-load_dotenv()
+
+load_dotenv(dotenv_path="/workspaces/analogAPI/.env")
+
+# DEPUBUGGING
+print(f"DEBUG: DATABASE_URL={os.getenv('DATABASE_URL')}")
+print(f"DEBUG: TEST_DATABASE_URL={os.getenv('TEST_DATABASE_URL')}")
+
+Base = declarative_base()
+
+class Database:
+    def __init__(self):
+        self.engine = None
+        self.SessionLocal = None
+
+    def get_engine(self, db_url=None, retries=3, delay=2):
+        if self.engine is None:
+            if db_url is None:
+                db_url = os.getenv("DATABASE_URL", os.getenv("TEST_DATABASE_URL"))
+                if db_url is None:
+                    raise ValueError("DATABASE_URL or TEST_DATABASE_URL must be set")
+            print(f"DEBUG: Initializing engine with db_url={db_url}")
+            for attempt in range(retries):
+                try:
+                    self.engine = create_engine(db_url)
+                    with self.engine.connect() as connection:
+                        connection.execute(text("SELECT 1"))
+                    print("DEBUG: Engine initialized successfully")
+                    break
+                except OperationalError as e:
+                    print(f"ERROR: Failed to initialize engine (attempt {attempt + 1}/{retries}): {e}")
+                    if attempt < retries - 1:
+                        print(f"Retrying in {delay} seconds...")
+                        time.sleep(delay)
+                    else:
+                        raise Exception(f"Failed to initialize engine after {retries} attempts: {e}")
+                except Exception as e:
+                    print(f"ERROR: Unexpected error while initializing engine: {e}")
+                    raise
+        return self.engine
+
+    def get_session(self, db_url=None):
+        if self.SessionLocal is None:
+            engine = self.get_engine(db_url)
+            self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        return self.SessionLocal
+
+    def initialize(self, db_url=None):
+        print("DEBUG: Calling initialize_engine_and_session")
+        self.get_engine(db_url)
+        self.get_session(db_url)
+        print(f"DEBUG: Engine after initialization: {self.engine}")
+
+
+db = Database()
+
+
+SessionLocal = db.get_session()
 
 def get_engine(db_url=None):
-    """Obtiene un engine para la URL de la base de datos proporcionada o la predeterminada."""
-    load_dotenv()
-    url = db_url if db_url else os.getenv("TEST_DATABASE_URL", os.getenv("DATABASE_URL"))
-    if not url:
-        raise ValueError("No database URL provided and DATABASE_URL/TEST_DATABASE_URL not set")
-    return create_engine(url)
+    return db.get_engine(db_url)
 
 def get_session(db_url=None):
-    """Obtiene una sesión para la URL de la base de datos proporcionada o la predeterminada."""
-    engine = get_engine(db_url)
-    return sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-engine = None
-SessionLocal = None
+    return db.get_session(db_url)
 
 def initialize_engine_and_session(db_url=None):
-    """Inicializa o reinicializa el engine y la sesión global."""
-    global engine, SessionLocal
-    engine = get_engine(db_url)
-    SessionLocal = get_session(db_url)
-
-initialize_engine_and_session()
+    db.initialize(db_url)
 
 def clear_database(db_url=None):
     from .models.camera import Camera
@@ -65,4 +107,4 @@ def clear_database(db_url=None):
         raise Exception(f"Error clearing database: {e}")
     finally:
         db.close()
-        temp_engine.dispose() 
+        temp_engine.dispose()

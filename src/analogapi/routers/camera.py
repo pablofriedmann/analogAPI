@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from ..database import SessionLocal
+from ..database import get_session 
 from ..models.camera import Camera
 from ..models.film import Film
 from ..schemas.camera import CameraCreate, CameraOut
@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 def get_db():
-    db = SessionLocal()
+    db = get_session()() 
     try:
         yield db
     finally:
@@ -85,7 +85,6 @@ def get_compatible_films(camera_id: int, db: Session = Depends(get_db)):
     db_camera = db.query(Camera).filter(Camera.id == camera_id).first()
     if db_camera is None:
         raise HTTPException(status_code=404, detail="Camera not found")
-
 
     compatible_films = db.query(Film).filter(Film.format == db_camera.format).all()
     return compatible_films

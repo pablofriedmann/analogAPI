@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from ..database import SessionLocal  # Cambiar ...database a ..database
+from ..database import get_session 
 from ..models.film import Film
 from ..models.camera import Camera
 from ..schemas.film import FilmCreate, FilmOut
@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 def get_db():
-    db = SessionLocal()
+    db = get_session()() 
     try:
         yield db
     finally:
