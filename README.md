@@ -28,7 +28,6 @@ AnalogAPI lets you interact with a database of analog gear—from your favorite 
 ### Upcoming Features
 
 ☐ **Compatibility Logic** (e.g., 120 film for medium format cameras): Enhance compatibility logic beyond format matching.  
-☐ **Preferences Enhancement**: Add predefined options for `favorite_photography_type` (e.g., `portrait`, `street`, `nature`, `animals`, `landscapes`, `fashion`, etc.).
 
 ---
 
