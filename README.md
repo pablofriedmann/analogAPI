@@ -23,11 +23,11 @@ AnalogAPI lets you interact with a database of analog gear—from your favorite 
 - ✅ **Format-based Compatibility** - `/cameras/{id}/compatible-films` and `/films/{id}/compatible-cameras`: Find films compatible with a camera or cameras compatible with a film based on format.
 - ✅ **Preferences Enhancement**: Added predefined options for `favorite_photography_type` (e.g., `portrait`, `street`, `nature`, etc.), `preferred_format`, `color_preference`, `preferred_camera_type`, `preferred_focal_length`, and `favourite_look`, allowing multiple photography types. Fixed database schema issues to ensure proper functionality.
 - ✅ **User Auth (JWT)**: Register, login, and secure endpoints with JWT authentication (`/users/register`, `/users/login`, `/users/me`, `/users/preferences`).
+- ✅ **Favorites** - `/favorites`: Allow users to mark cameras and films as favorites, remove them, and list their favorites (`/favorites/cameras`, `/favorites/films`).
 
 ### Upcoming Features
 
 ☐ **Compatibility Logic** (e.g., 120 film for medium format cameras): Enhance compatibility logic beyond format matching.  
-☐ **Favorites**: Let users collect what they love by marking cameras and films as favorites.  
 ☐ **Preferences Enhancement**: Add predefined options for `favorite_photography_type` (e.g., `portrait`, `street`, `nature`, `animals`, `landscapes`, `fashion`, etc.).
 
 ---
@@ -53,7 +53,7 @@ AnalogAPI lets you interact with a database of analog gear—from your favorite 
 - [x] Seed: 5 Cameras + 5 Films
 - [x] Recommendations
 - [x] User Auth (JWT)
-- [ ] Favorites
+- [x] Favorites
 - [ ] Postman collection
 - [ ] Render Deployment
 
