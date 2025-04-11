@@ -158,6 +158,26 @@ PYTHONPATH=$PYTHONPATH:/workspaces/analogAPI/src pytest --cov=src/analogapi test
 
 ---
 
+## 📨Postman Collection
+
+<img src="https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=Postman&logoColor=white" /> 
+
+A Postman collection is available to test the API endpoints:
+
+- Collection: AnalogAPI.postman_collection.json
+- Environment: AnalogAPI-Dev.postman_environment.json
+
+To use the collection:
+
+1. Import the collection and environment into Postman.
+2. Set the base_url variable in the AnalogAPI-Dev environment to your API's URL (e.g., https://<your-codespace>.app.github.dev without the :8000 port, as GitHub Codespaces may redirect external requests).
+3. Use the POST Login User request to authenticate and automatically set the access_token variable.
+4. Test the other endpoints, which use the access_token for authentication.
+
+Note: If requests using {{base_url}} fail with a 404 Not Found, double-check the base_url value in the environment. I had several problems with this situation. Ensure there are no extra spaces, hidden characters, or truncated parts in the URL (Postman may truncate long URLs in the UI). Test the base_url directly in a browser to confirm it works. 
+
+---
+
 ## 🔺 Project Architecture
 
 ```mermaid
