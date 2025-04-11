@@ -21,7 +21,7 @@ AnalogAPI lets you interact with a database of analog gear—from your favorite 
 - ✅ **CRUD for Films** - `/films`: Manage your favorite film stocks.
 - ✅ **Tagging System** - `/tags`: Add, edit, browse, and remove tags; associate tags with cameras and films.
 - ✅ **Format-based Compatibility** - `/cameras/{id}/compatible-films` and `/films/{id}/compatible-cameras`: Find films compatible with a camera or cameras compatible with a film based on format.
-- ✅ **Recommendations Endpoint** - `/recommendations`: Suggest cameras and films based on user preferences (e.g., favorite photography type, preferred format, color preference).  
+- ✅ **Preferences Enhancement**: Added predefined options for `favorite_photography_type` (e.g., `portrait`, `street`, `nature`, etc.), `preferred_format`, `color_preference`, `preferred_camera_type`, `preferred_focal_length`, and `favourite_look`, allowing multiple photography types. Fixed database schema issues to ensure proper functionality.
 - ✅ **User Auth (JWT)**: Register, login, and secure endpoints with JWT authentication (`/users/register`, `/users/login`, `/users/me`, `/users/preferences`).
 
 ### Upcoming Features
@@ -100,6 +100,7 @@ pip install -r requirements.txt
 docker-compose up -d
 
 # 5. Run the app
+cd src
 uvicorn analogapi.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
