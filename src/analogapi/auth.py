@@ -5,21 +5,17 @@ from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-from .database import get_session  # Agregar importación de get_session
+from .database import get_session  
 from .models.user import User
 
-# Configuración para JWT
-SECRET_KEY = "your-secret-key"  # Cambia esto por una clave secreta más segura
+SECRET_KEY = "your-secret-key"  
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-# Configuración para hash de contraseñas
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Configuración para OAuth2
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/login")
 
-# Definir get_db antes de usarlo
 def get_db():
     db = get_session()()
     try:
