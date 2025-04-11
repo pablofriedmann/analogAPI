@@ -1,12 +1,14 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from .database import get_engine, initialize_engine_and_session, Base
-from .routers import camera, film, tag, user, recommendations
+from .routers import camera, film, tag, user, recommendations, favorites
 from .models.camera import Camera
 from .models.film import Film
 from .models.tag import Tag
 from .models.user import User
 from .models.user_preferences import UserPreferences
+from .models.favorite_camera import FavoriteCamera
+from .models.favorite_film import FavoriteFilm
 
 initialize_engine_and_session()
 
@@ -27,6 +29,7 @@ app.include_router(film.router)
 app.include_router(tag.router)
 app.include_router(user.router)
 app.include_router(recommendations.router)
+app.include_router(favorites.router)
 
 @app.get("/")
 def read_root():

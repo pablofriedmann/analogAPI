@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-from ..database import Base  
+from ..database import Base
 from ..tables import film_tags
 
 class Film(Base):
@@ -12,6 +12,7 @@ class Film(Base):
     format = Column(String, nullable=False)
     type = Column(String, nullable=False)
     iso = Column(Integer, nullable=False)
-    grain = Column(String)
+    grain = Column(String, nullable=True)
 
     tags = relationship("Tag", secondary=film_tags, back_populates="films")
+    favorited_by = relationship("FavoriteFilm", back_populates="film")
