@@ -1,0 +1,529 @@
+{
+	"info": {
+	  "_postman_id": "b2fe4959-6d74-4058-a98c-4ff2647ef2be",
+	  "name": "AnalogAPI",
+	  "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+	  "_exporter_id": "40762507"
+	},
+	"item": [
+	  {
+		"name": "Get Root",
+		"request": {
+		  "method": "GET",
+		  "header": [],
+		  "url": {
+			"raw": "{{base_url}}/",
+			"host": [
+			  "{{base_url}}"
+			],
+			"path": [
+			  ""
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "Register user",
+		"request": {
+		  "method": "POST",
+		  "header": [],
+		  "body": {
+			"mode": "raw",
+			"raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"testuser@example.com\",\n  \"password\": \"testpassword\"\n}",
+			"options": {
+			  "raw": {
+				"language": "json"
+			  }
+			}
+		  },
+		  "url": {
+			"raw": "{{base_url}}/users/register",
+			"host": [
+			  "{{base_url}}"
+			],
+			"path": [
+			  "users",
+			  "register"
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "Login",
+		"request": {
+		  "method": "POST",
+		  "header": [],
+		  "body": {
+			"mode": "urlencoded",
+			"urlencoded": [
+			  {
+				"key": "username",
+				"value": "testuser",
+				"type": "text"
+			  },
+			  {
+				"key": "password",
+				"value": "testpassword",
+				"type": "text"
+			  }
+			]
+		  },
+		  "url": {
+			"raw": "{{base_url}}/users/login",
+			"host": [
+			  "{{base_url}}"
+			],
+			"path": [
+			  "users",
+			  "login"
+			]
+		  }
+		},
+		"response": [],
+		"event": [
+		  {
+			"listen": "test",
+			"script": {
+			  "exec": [
+				"const response = pm.response.json();",
+				"pm.environment.set(\"access_token\", response.access_token);"
+			  ],
+			  "type": "text/javascript"
+			}
+		  }
+		]
+	  },
+	  {
+		"name": "Current User",
+		"request": {
+		  "method": "GET",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{access_token}}",
+			  "type": "text"
+			}
+		  ],
+		  "url": {
+			"raw": "{{base_url}}/users/me",
+			"host": [
+			  "{{base_url}}"
+			],
+			"path": [
+			  "users",
+			  "me"
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "Create Camera",
+		"request": {
+		  "method": "POST",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{access_token}}",
+			  "type": "text"
+			}
+		  ],
+		  "body": {
+			"mode": "raw",
+			"raw": "{\n  \"brand\": \"Canon\",\n  \"model\": \"AE-1\",\n  \"format\": \"35mm\",\n  \"type\": \"slr\",\n  \"years\": \"1976-1984\",\n  \"lens_mount\": \"Canon FD\"\n}",
+			"options": {
+			  "raw": {
+				"language": "json"
+			  }
+			}
+		  },
+		  "url": {
+			"raw": "{{base_url}}/cameras/",
+			"host": [
+			  "{{base_url}}"
+			],
+			"path": [
+			  "cameras",
+			  ""
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "List Cameras",
+		"request": {
+		  "method": "GET",
+		  "header": [],
+		  "url": {
+			"raw": "{{base_url}}/cameras/",
+			"host": [
+			  "{{base_url}}"
+			],
+			"path": [
+			  "cameras",
+			  ""
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "Create Film",
+		"request": {
+		  "method": "POST",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{access_token}}",
+			  "type": "text"
+			}
+		  ],
+		  "body": {
+			"mode": "raw",
+			"raw": "{\n  \"brand\": \"Kodak\",\n  \"name\": \"Portra 400\",\n  \"format\": \"35mm\",\n  \"type\": \"Color\",\n  \"iso\": 400,\n  \"grain\": \"fine\"\n}",
+			"options": {
+			  "raw": {
+				"language": "json"
+			  }
+			}
+		  },
+		  "url": {
+			"raw": "{{base_url}}/films/",
+			"host": [
+			  "{{base_url}}"
+			],
+			"path": [
+			  "films",
+			  ""
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "List Films",
+		"request": {
+		  "method": "GET",
+		  "header": [],
+		  "url": {
+			"raw": "{{base_url}}/films/",
+			"host": [
+			  "{{base_url}}"
+			],
+			"path": [
+			  "films",
+			  ""
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "Create Tag",
+		"request": {
+		  "method": "POST",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{access_token}}",
+			  "type": "text"
+			}
+		  ],
+		  "body": {
+			"mode": "raw",
+			"raw": "{\n  \"name\": \"portrait\"\n}",
+			"options": {
+			  "raw": {
+				"language": "json"
+			  }
+			}
+		  },
+		  "url": {
+			"raw": "{{base_url}}/tags/",
+			"host": [
+			  "{{base_url}}"
+			],
+			"path": [
+			  "tags",
+			  ""
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "List Tags",
+		"request": {
+		  "method": "GET",
+		  "header": [],
+		  "url": {
+			"raw": "{{base_url}}/tags/",
+			"host": [
+			  "{{base_url}}"
+			],
+			"path": [
+			  "tags",
+			  ""
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "Create Preferences",
+		"request": {
+		  "method": "POST",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{access_token}}",
+			  "type": "text"
+			}
+		  ],
+		  "body": {
+			"mode": "raw",
+			"raw": "{\n  \"favorite_photography_type\": [\"portrait\", \"street\", \"nature\"],\n  \"preferred_format\": \"35mm\",\n  \"color_preference\": \"both\",\n  \"preferred_camera_type\": \"slr\",\n  \"preferred_focal_length\": \"standard\",\n  \"favourite_look\": \"cinematic\"\n}",
+			"options": {
+			  "raw": {
+				"language": "json"
+			  }
+			}
+		  },
+		  "url": {
+			"raw": "{{base_url}}/users/preferences",
+			"host": [
+			  "{{base_url}}"
+			],
+			"path": [
+			  "users",
+			  "preferences"
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "Get Preferences",
+		"request": {
+		  "method": "GET",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{access_token}}",
+			  "type": "text"
+			}
+		  ],
+		  "url": {
+			"raw": "{{base_url}}/users/preferences",
+			"host": [
+			  "{{base_url}}"
+			],
+			"path": [
+			  "users",
+			  "preferences"
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "Camera Recommendations",
+		"request": {
+		  "method": "GET",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{access_token}}",
+			  "type": "text"
+			}
+		  ],
+		  "url": {
+			"raw": "{{base_url}}/recommendations/cameras",
+			"host": [
+			  "{{base_url}}"
+			],
+			"path": [
+			  "recommendations",
+			  "cameras"
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "Film Recommendations",
+		"request": {
+		  "method": "GET",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{access_token}}",
+			  "type": "text"
+			}
+		  ],
+		  "url": {
+			"raw": "{{base_url}}/recommendations/films",
+			"host": [
+			  "{{base_url}}"
+			],
+			"path": [
+			  "recommendations",
+			  "films"
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "Add Favorite Camera",
+		"request": {
+		  "method": "POST",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{access_token}}",
+			  "type": "text"
+			}
+		  ],
+		  "url": {
+			"raw": "{{base_url}}/favorites/cameras/1",
+			"host": [
+			  "{{base_url}}"
+			],
+			"path": [
+			  "favorites",
+			  "cameras",
+			  "1"
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "List Favorite Cameras",
+		"request": {
+		  "method": "GET",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{access_token}}",
+			  "type": "text"
+			}
+		  ],
+		  "url": {
+			"raw": "{{base_url}}/favorites/cameras",
+			"host": [
+			  "{{base_url}}"
+			],
+			"path": [
+			  "favorites",
+			  "cameras"
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "Remove Favorite Camera",
+		"request": {
+		  "method": "DELETE",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{access_token}}",
+			  "type": "text"
+			}
+		  ],
+		  "url": {
+			"raw": "{{base_url}}/favorites/cameras/1",
+			"host": [
+			  "{{base_url}}"
+			],
+			"path": [
+			  "favorites",
+			  "cameras",
+			  "1"
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "Add Favorite Film",
+		"request": {
+		  "method": "POST",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{access_token}}",
+			  "type": "text"
+			}
+		  ],
+		  "url": {
+			"raw": "{{base_url}}/favorites/films/1",
+			"host": [
+			  "{{base_url}}"
+			],
+			"path": [
+			  "favorites",
+			  "films",
+			  "1"
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "List Favorite Films",
+		"request": {
+		  "method": "GET",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{access_token}}",
+			  "type": "text"
+			}
+		  ],
+		  "url": {
+			"raw": "{{base_url}}/favorites/films",
+			"host": [
+			  "{{base_url}}"
+			],
+			"path": [
+			  "favorites",
+			  "films"
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "Remove Favorite Film",
+		"request": {
+		  "method": "DELETE",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{access_token}}",
+			  "type": "text"
+			}
+		  ],
+		  "url": {
+			"raw": "{{base_url}}/favorites/films/1",
+			"host": [
+			  "{{base_url}}"
+			],
+			"path": [
+			  "favorites",
+			  "films",
+			  "1"
+			]
+		  }
+		},
+		"response": []
+	  }
+	]
+  }
