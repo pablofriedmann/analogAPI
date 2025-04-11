@@ -53,7 +53,7 @@ AnalogAPI lets you interact with a database of analog gear—from your favorite 
 - [x] Recommendations
 - [x] User Auth (JWT)
 - [x] Favorites
-- [ ] Postman collection
+- [x] Postman collection
 - [ ] Render Deployment
 
 ### Phase 2: Data Expansion & Scraping
