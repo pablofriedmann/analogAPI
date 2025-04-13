@@ -24,6 +24,7 @@ AnalogAPI lets you interact with a database of analog gear—from your favorite 
 - ✅ **Preferences Enhancement**: Added predefined options for `favorite_photography_type` (e.g., `portrait`, `street`, `nature`, etc.), `preferred_format`, `color_preference`, `preferred_camera_type`, `preferred_focal_length`, and `favourite_look`, allowing multiple photography types. Fixed database schema issues to ensure proper functionality.
 - ✅ **User Auth (JWT)**: Register, login, and secure endpoints with JWT authentication (`/users/register`, `/users/login`, `/users/me`, `/users/preferences`).
 - ✅ **Favorites** - `/favorites`: Allow users to mark cameras and films as favorites, remove them, and list their favorites (`/favorites/cameras`, `/favorites/films`).
+- ✅ **Render Deployment**: Deployed the API to Render!
 
 ### Upcoming Features
 
@@ -39,13 +40,19 @@ AnalogAPI lets you interact with a database of analog gear—from your favorite 
 
 - **Docker** — For containerized local setup <img src="https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white" />
 - **Swagger UI** — Auto-generated docs at `/docs` <img src="https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=Swagger&logoColor=white" />
-- **Pytest** — For testing endpoints
+
+- **Uvicorn** — ASGI server for running the API <img src="https://img.shields.io/badge/Uvicorn-29313A?style=for-the-badge&logo=uvicorn&logoColor=white" />
+- **JWT** — For user authentication (via python-jose) <img src="https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON-Web-Tokens&logoColor=white" />
+
+- **Render** — Deployment platform for production <img src="https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=white" />
+- **Postman** — For testing API endpoints <img src="https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=Postman&logoColor=white" />
+- **requests + BeautifulSoup** — For web scraping (Phase 2) <img src="https://img.shields.io/badge/Requests-000000?style=for-the-badge&logo=python&logoColor=white" /> <img src="https://img.shields.io/badge/BeautifulSoup-000000?style=for-the-badge&logo=python&logoColor=white" />
 
 ---
 
 ## 📚 Roadmap
 
-### Phase 1: MVP (In Progress)
+### ✅Phase 1: 🎉MVP COMPLETED!🎉
 - [x] CRUD for Cameras & Films
 - [x] Tags
 - [x] Format-based compatibility
@@ -54,7 +61,7 @@ AnalogAPI lets you interact with a database of analog gear—from your favorite 
 - [x] User Auth (JWT)
 - [x] Favorites
 - [x] Postman collection
-- [ ] Render Deployment
+- [x] Render Deployment
 
 ### Phase 2: Data Expansion & Scraping
 - Manual scraping (e.g., Lomography, Film Photography Project)
