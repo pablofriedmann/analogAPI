@@ -127,7 +127,6 @@ class UserPreferences(Base):
             raise ValueError(f"Invalid focal length: {value}. Must be one of {valid_lengths}")
         return value
 
-
     @staticmethod
     def validate_favourite_look(value):
         if value is None:

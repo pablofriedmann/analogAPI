@@ -6,10 +6,9 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exc import OperationalError
 
-
 load_dotenv(dotenv_path="/workspaces/analogAPI/.env")
 
-# DEPUBUGGING
+# DEBUGGING
 print(f"DEBUG: DATABASE_URL={os.getenv('DATABASE_URL')}")
 print(f"DEBUG: TEST_DATABASE_URL={os.getenv('TEST_DATABASE_URL')}")
 
@@ -58,9 +57,7 @@ class Database:
         self.get_session(db_url)
         print(f"DEBUG: Engine after initialization: {self.engine}")
 
-
 db = Database()
-
 
 SessionLocal = db.get_session()
 
@@ -108,3 +105,11 @@ def clear_database(db_url=None):
     finally:
         db.close()
         temp_engine.dispose()
+
+def get_db():
+   
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
