@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
-from ..auth import get_current_user, get_db
+from sqlalchemy.sql import select, delete
+from ..database import get_db
 from ..models.user import User
-from ..models.favorite_camera import FavoriteCamera
-from ..models.favorite_film import FavoriteFilm
+from ..models.camera import Camera
+from ..models.film import Film
+from ..models.tables import favorite_cameras, favorite_films
 from ..schemas.favorite_camera import FavoriteCameraCreate, FavoriteCameraOut
 from ..schemas.favorite_film import FavoriteFilmCreate, FavoriteFilmOut
 
@@ -14,74 +15,86 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-# PICKS FAVORITE CAMERA
-@router.post("/cameras/{camera_id}", response_model=FavoriteCameraOut, status_code=status.HTTP_201_CREATED)
-def add_favorite_camera(camera_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    existing_favorite = db.query(FavoriteCamera).filter(
-        FavoriteCamera.user_id == current_user.id,
-        FavoriteCamera.camera_id == camera_id
-    ).first()
-    if existing_favorite:
+@router.post("/cameras/{camera_id}", response_model=FavoriteCameraOut)
+def add_favorite_camera(camera_id: int, user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    camera = db.query(Camera).filter(Camera.id == camera_id).first()
+    if not camera:
+        raise HTTPException(status_code=404, detail="Camera not found")
+
+    query = select(favorite_cameras).where(
+        favorite_cameras.c.user_id == user_id,
+        favorite_cameras.c.camera_id == camera_id
+    )
+    favorite = db.execute(query).fetchone()
+    if favorite:
         raise HTTPException(status_code=400, detail="Camera already in favorites")
 
-    favorite = FavoriteCamera(user_id=current_user.id, camera_id=camera_id)
-    db.add(favorite)
+    insert_stmt = favorite_cameras.insert().values(user_id=user_id, camera_id=camera_id)
+    result = db.execute(insert_stmt)
     db.commit()
-    db.refresh(favorite)
-    return favorite
 
-# DELETES FAVORITE CAMERA
-@router.delete("/cameras/{camera_id}", status_code=status.HTTP_204_NO_CONTENT)
-def remove_favorite_camera(camera_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    favorite = db.query(FavoriteCamera).filter(
-        FavoriteCamera.user_id == current_user.id,
-        FavoriteCamera.camera_id == camera_id
-    ).first()
-    if not favorite:
-        raise HTTPException(status_code=404, detail="Camera not in favorites")
+    return {"id": result.inserted_primary_key[0] if result.inserted_primary_key else None, "user_id": user_id, "camera_id": camera_id}
 
-    db.delete(favorite)
-    db.commit()
-    return
+@router.post("/films/{film_id}", response_model=FavoriteFilmOut)
+def add_favorite_film(film_id: int, user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
 
-# GET FAVORITE CAMERA
-@router.get("/cameras", response_model=List[FavoriteCameraOut])
-def get_favorite_cameras(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    favorites = db.query(FavoriteCamera).filter(FavoriteCamera.user_id == current_user.id).all()
-    return favorites
+    film = db.query(Film).filter(Film.id == film_id).first()
+    if not film:
+        raise HTTPException(status_code=404, detail="Film not found")
 
-# PICK FAVORITE FILM
-@router.post("/films/{film_id}", response_model=FavoriteFilmOut, status_code=status.HTTP_201_CREATED)
-def add_favorite_film(film_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    existing_favorite = db.query(FavoriteFilm).filter(
-        FavoriteFilm.user_id == current_user.id,
-        FavoriteFilm.film_id == film_id
-    ).first()
-    if existing_favorite:
+    query = select(favorite_films).where(
+        favorite_films.c.user_id == user_id,
+        favorite_films.c.film_id == film_id
+    )
+    favorite = db.execute(query).fetchone()
+    if favorite:
         raise HTTPException(status_code=400, detail="Film already in favorites")
 
-    favorite = FavoriteFilm(user_id=current_user.id, film_id=film_id)
-    db.add(favorite)
+    insert_stmt = favorite_films.insert().values(user_id=user_id, film_id=film_id)
+    result = db.execute(insert_stmt)
     db.commit()
-    db.refresh(favorite)
-    return favorite
 
-# DELETE FAVORITE FILM
-@router.delete("/films/{film_id}", status_code=status.HTTP_204_NO_CONTENT)
-def remove_favorite_film(film_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    favorite = db.query(FavoriteFilm).filter(
-        FavoriteFilm.user_id == current_user.id,
-        FavoriteFilm.film_id == film_id
-    ).first()
+    return {"id": result.inserted_primary_key[0] if result.inserted_primary_key else None, "user_id": user_id, "film_id": film_id}
+
+@router.delete("/cameras/{camera_id}")
+def remove_favorite_camera(camera_id: int, user_id: int, db: Session = Depends(get_db)):
+    query = select(favorite_cameras).where(
+        favorite_cameras.c.user_id == user_id,
+        favorite_cameras.c.camera_id == camera_id
+    )
+    favorite = db.execute(query).fetchone()
     if not favorite:
-        raise HTTPException(status_code=404, detail="Film not in favorites")
+        raise HTTPException(status_code=404, detail="Favorite camera not found")
 
-    db.delete(favorite)
+    delete_stmt = delete(favorite_cameras).where(
+        favorite_cameras.c.user_id == user_id,
+        favorite_cameras.c.camera_id == camera_id
+    )
+    db.execute(delete_stmt)
     db.commit()
-    return
+    return {"message": "Camera removed from favorites"}
 
-# GET FAVORITE FILM
-@router.get("/films", response_model=List[FavoriteFilmOut])
-def get_favorite_films(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    favorites = db.query(FavoriteFilm).filter(FavoriteFilm.user_id == current_user.id).all()
-    return favorites
+@router.delete("/films/{film_id}")
+def remove_favorite_film(film_id: int, user_id: int, db: Session = Depends(get_db)):
+    query = select(favorite_films).where(
+        favorite_films.c.user_id == user_id,
+        favorite_films.c.film_id == film_id
+    )
+    favorite = db.execute(query).fetchone()
+    if not favorite:
+        raise HTTPException(status_code=404, detail="Favorite film not found")
+
+    delete_stmt = delete(favorite_films).where(
+        favorite_films.c.user_id == user_id,
+        favorite_films.c.film_id == film_id
+    )
+    db.execute(delete_stmt)
+    db.commit()
+    return {"message": "Film removed from favorites"}

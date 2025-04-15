@@ -8,9 +8,7 @@ from .models.film import Film
 from .models.tag import Tag
 from .models.user import User
 from .models.user_preferences import UserPreferences
-from .models.favorite_camera import FavoriteCamera
-from .models.favorite_film import FavoriteFilm
-from .models.tables import camera_tags, film_tags, favorite_cameras, favorite_films 
+from .models.tables import camera_tags, film_tags, favorite_cameras, favorite_films
 
 initialize_engine_and_session()
 
