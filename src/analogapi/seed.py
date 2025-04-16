@@ -1,15 +1,14 @@
+# src/analogapi/seed.py
 import os
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import text
 from .database import get_engine, get_session, SessionLocal
+from .base import Base
 from .models.camera import Camera
 from .models.film import Film
-from .models.tag import Tag
-from .tables import camera_tags, film_tags
-from sqlalchemy.sql import text
-from .base import Base  #
+from .models.tag import Tag, camera_tags, film_tags 
 
 def seed_database(db_url=None, clear=True):
-    
     engine = get_engine(db_url)
     SessionLocal = get_session(db_url)
     db = SessionLocal()
@@ -69,11 +68,11 @@ def seed_database(db_url=None, clear=True):
 
         # SEEDS FILM
         films_data = [
-            {"brand": "Kodak", "name": "Portra 400", "format": "35mm", "type": "Color", "iso": 400, "grain": "Fine"},
-            {"brand": "Ilford", "name": "HP5 Plus", "format": "35mm", "type": "B&W", "iso": 400, "grain": "Medium"},
-            {"brand": "Fujifilm", "name": "Superia 400", "format": "35mm", "type": "Color", "iso": 400, "grain": "Fine"},
-            {"brand": "Kodak", "name": "Ektar 100", "format": "120", "type": "Color", "iso": 100, "grain": "Fine"},
-            {"brand": "Ilford", "name": "Delta 3200", "format": "120", "type": "B&W", "iso": 3200, "grain": "Coarse"},
+            {"brand": "Kodak", "name": "Portra 400", "format": "35mm", "color": "Color", "iso": 400, "grain": "Fine"},
+            {"brand": "Ilford", "name": "HP5 Plus", "format": "35mm", "color": "B&W", "iso": 400, "grain": "Medium"},
+            {"brand": "Fujifilm", "name": "Superia 400", "format": "35mm", "color": "Color", "iso": 400, "grain": "Fine"},
+            {"brand": "Kodak", "name": "Ektar 100", "format": "120", "color": "Color", "iso": 100, "grain": "Fine"},
+            {"brand": "Ilford", "name": "Delta 3200", "format": "120", "color": "B&W", "iso": 3200, "grain": "Coarse"},
         ]
         for film_data in films_data:
             if not db.query(Film).filter(Film.name == film_data["name"]).first():

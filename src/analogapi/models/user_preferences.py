@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, JSON
 from sqlalchemy.orm import relationship
-from ..database import Base
+from ..base import Base  
 from enum import Enum
 
 class PhotographyType(str, Enum):

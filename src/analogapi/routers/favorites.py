@@ -1,11 +1,11 @@
+# src/analogapi/routers/favorites.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import select, delete
 from ..database import get_db
 from ..models.user import User
-from ..models.camera import Camera
-from ..models.film import Film
-from ..models.tables import favorite_cameras, favorite_films
+from ..models.camera import Camera, favorite_cameras
+from ..models.film import Film, favorite_films 
 from ..schemas.favorite_camera import FavoriteCameraCreate, FavoriteCameraOut
 from ..schemas.favorite_film import FavoriteFilmCreate, FavoriteFilmOut
 

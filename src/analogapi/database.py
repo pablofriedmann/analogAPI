@@ -1,18 +1,31 @@
+# src/analogapi/database.py
 import os
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.sql import text
+import logging
 import time
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exc import OperationalError
+
+from .base import Base
+
+from .models.tag import Tag
+from .models.camera import Camera
+from .models.film import Film
+from .models.user import User
+from .models.user_preferences import UserPreferences
 
 load_dotenv(dotenv_path="/workspaces/analogAPI/.env")
 
-# DEBUGGING
-print(f"DEBUG: DATABASE_URL={os.getenv('DATABASE_URL')}")
-print(f"DEBUG: TEST_DATABASE_URL={os.getenv('TEST_DATABASE_URL')}")
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
-Base = declarative_base()
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/analogapi_dev")
+TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL", "postgresql://user:password@localhost:5432/analogapi_test")
+
+print(f"DEBUG: DATABASE_URL={DATABASE_URL}")
+print(f"DEBUG: TEST_DATABASE_URL={TEST_DATABASE_URL}")
 
 class Database:
     def __init__(self):
@@ -71,10 +84,7 @@ def initialize_engine_and_session(db_url=None):
     db.initialize(db_url)
 
 def clear_database(db_url=None):
-    from .models.camera import Camera
-    from .models.film import Film
-    from .models.tag import Tag
-    from .tables import camera_tags, film_tags
+    from .models.tables import camera_tags, film_tags, favorite_cameras, favorite_films
 
     environment = os.getenv("ENVIRONMENT", "development")
     if environment == "production":
@@ -88,10 +98,27 @@ def clear_database(db_url=None):
         count_before = db.execute(text("SELECT COUNT(*) FROM tags")).scalar()
         print(f"Tags before clearing: {count_before}")
 
-        print("Tables to clear:", [table.name for table in Base.metadata.sorted_tables])
-        for table in reversed(Base.metadata.sorted_tables):
-            print(f"Deleting from table: {table.name}")
-            db.execute(table.delete())
+        tables = [
+            camera_tags,
+            film_tags,
+            favorite_cameras,
+            favorite_films,
+            "user_preferences",
+            "tags",
+            "films",
+            "cameras",
+            "users",
+        ]
+
+        print(f"Tables to clear: {[table.name if hasattr(table, 'name') else table for table in tables]}")
+        for table in tables:
+            if isinstance(table, str):
+                print(f"Deleting from table: {table}")
+                db.execute(text(f"DELETE FROM {table}"))
+            else:
+                print(f"Deleting from table: {table.name}")
+                db.execute(table.delete())
+
         db.commit()
         print("Database cleared successfully")
 
@@ -107,7 +134,6 @@ def clear_database(db_url=None):
         temp_engine.dispose()
 
 def get_db():
-   
     db = SessionLocal()
     try:
         yield db

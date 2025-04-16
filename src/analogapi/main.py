@@ -1,14 +1,20 @@
+# src/analogapi/main.py
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
+from sqlalchemy.orm import configure_mappers
 
-from .database import get_engine, initialize_engine_and_session, Base
-from .routers import camera, film, tag, user, recommendations, favorites, scrape
+from .base import Base
+from .database import get_engine, initialize_engine_and_session, get_db
+
 from .models.camera import Camera
 from .models.film import Film
 from .models.tag import Tag
 from .models.user import User
 from .models.user_preferences import UserPreferences
-from .models.tables import camera_tags, film_tags, favorite_cameras, favorite_films
+
+from .routers import camera, film, tag, user, recommendations, favorites, scrape
+
+configure_mappers()
 
 initialize_engine_and_session()
 

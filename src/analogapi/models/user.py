@@ -1,7 +1,6 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-from ..database import Base
-from .tables import favorite_cameras, favorite_films
+from ..base import Base
 
 class User(Base):
     __tablename__ = "users"
@@ -11,6 +10,6 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
 
-    favorite_cameras = relationship("Camera", secondary=favorite_cameras, back_populates="favorite_users")
-    favorite_films = relationship("Film", secondary=favorite_films, back_populates="favorite_users")
+    favorite_cameras = relationship("Camera", secondary="favorite_cameras", back_populates="favorite_users")
+    favorite_films = relationship("Film", secondary="favorite_films", back_populates="favorite_users")
     preferences = relationship("UserPreferences", back_populates="user", uselist=False)
