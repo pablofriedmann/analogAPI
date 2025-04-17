@@ -1,3 +1,4 @@
+# src/analogapi/scrapers/scrape_films.py
 import requests
 import re
 from bs4 import BeautifulSoup
@@ -8,6 +9,7 @@ import time
 import urllib3
 from datetime import datetime
 
+# Disable SSL warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def is_not_a_film(film_name, film_url):
@@ -16,33 +18,45 @@ def is_not_a_film(film_name, film_url):
     """
     name_lower = film_name.lower()
     url_lower = film_url.lower()
-    if any(keyword in name_lower for keyword in ["camera", "category", "template", "format", "encoding"]):
+    # Excluir páginas que son categorías o contienen palabras relacionadas con cámaras
+    if any(keyword in name_lower for keyword in ["camera", "category", "template", "format", "encoding", "instamatic", "box", "flex", "reflex", "bessa", "brownie"]):
         return True
     if any(keyword in url_lower for keyword in ["camera", "category"]):
         return True
-    if name_lower.isdigit() or "film" not in name_lower:
+    # Excluir nombres que no parezcan películas (e.g., solo números o sin "film")
+    if name_lower.isdigit() or ("film" not in name_lower and "color" not in name_lower and "negative" not in name_lower):
         return True
     return False
 
 def scrape_films(max_films_per_category=10, max_categories=None, max_category_pages=1):
-    
+    """
+    Scrapes analog films from specific brand categories on Camera-wiki.org.
+    Args:
+        max_films_per_category (int): Maximum number of films to scrape per category.
+        max_categories (int): Maximum number of categories to scrape.
+        max_category_pages (int): Maximum number of subcategory pages to process.
+    Returns:
+        list: List of dictionaries with the scraped film data.
+    """
     max_categories = max_categories if max_categories is not None else 10
     max_films_per_category = max(max_films_per_category, 1)
 
+    # Define categories based on film brands
     film_categories = [
-        "https://camera-wiki.org/wiki/Category:Film_Stocks",
-        "https://camera-wiki.org/wiki/Category:35mm_film",
-        "https://camera-wiki.org/wiki/Category:120_film",
-        "https://camera-wiki.org/wiki/Category:Instant_film",
-        "https://camera-wiki.org/wiki/Category:110_film",
-        "https://camera-wiki.org/wiki/Category:126_film",
-        "https://camera-wiki.org/wiki/Category:127_film",
+        "https://camera-wiki.org/wiki/Category:Kodak",
+        "https://camera-wiki.org/wiki/Category:Ilford",
+        "https://camera-wiki.org/wiki/Category:Fujifilm",
+        "https://camera-wiki.org/wiki/Category:Agfa",
+        "https://camera-wiki.org/wiki/Category:Foma",
+        "https://camera-wiki.org/wiki/Category:Konica",
+        "https://camera-wiki.org/wiki/Category:Orwo",
+        "https://camera-wiki.org/wiki/Category:Adox",
     ]
 
     headers = {
         "User-Agent": "AnalogAPI-Scraper/1.0 (pablofriedmann; https://github.com/pablofriedmann/analogAPI)"
     }
-    delay = 1  
+    delay = 1  # Delay between requests
 
     categories = []
     for category_url in film_categories:
@@ -108,19 +122,19 @@ def scrape_films(max_films_per_category=10, max_categories=None, max_category_pa
                     iso = None
                     grain = "Unknown"
 
-                    # Inferir el formato desde la categoría
-                    category_name = category_url.split("/")[-1].lower()
-                    if "35mm_film" in category_name:
+                    # Intentar inferir el formato desde el nombre o URL
+                    name_lower = film_name.lower()
+                    if "35mm" in name_lower or "35mm" in film_url.lower():
                         format = "35mm"
-                    elif "120_film" in category_name:
+                    elif "120" in name_lower or "120" in film_url.lower():
                         format = "120"
-                    elif "110_film" in category_name:
+                    elif "110" in name_lower or "110" in film_url.lower():
                         format = "110"
-                    elif "126_film" in category_name:
+                    elif "126" in name_lower or "126" in film_url.lower():
                         format = "126"
-                    elif "127_film" in category_name:
+                    elif "127" in name_lower or "127" in film_url.lower():
                         format = "127"
-                    elif "instant_film" in category_name:
+                    elif "instant" in name_lower or "polaroid" in name_lower or "sx-70" in name_lower:
                         format = "Instant"
 
                     content = film_soup.select_one("div#mw-content-text")
@@ -149,7 +163,7 @@ def scrape_films(max_films_per_category=10, max_categories=None, max_category_pa
                                     if "type" in label or "color" in label:
                                         if "color" in value:
                                             color = "Color"
-                                        elif "black and white" in value or "b&w" in value:
+                                        elif "black and white" in value or "b&w" in value or "monochrome" in value:
                                             color = "Black and White"
                                     if "iso" in label or "speed" in label:
                                         iso = int(re.search(r'\d+', value).group()) if re.search(r'\d+', value) else None
@@ -170,12 +184,12 @@ def scrape_films(max_films_per_category=10, max_categories=None, max_category_pa
                                     format = "126"
                                 elif "127" in text:
                                     format = "127"
-                                elif "instant" in text or "polaroid" in text:
+                                elif "instant" in text or "polaroid" in text or "sx-70" in text:
                                     format = "Instant"
                             if ("type" in text or "color" in text) and color == "Unknown":
                                 if "color" in text:
                                     color = "Color"
-                                elif "black and white" in text or "b&w" in text:
+                                elif "black and white" in text or "b&w" in text or "monochrome" in text:
                                     color = "Black and White"
                             if ("iso" in text or "speed" in text) and not iso:
                                 iso_match = re.search(r'iso\s+(\d+)', text)
