@@ -63,7 +63,10 @@ AnalogAPI lets you interact with a database of analog gear—from your favorite 
 - [ ] Add tech specs: shutter type, lens system, country, etc. — **In Progress:** Currently extracting `lens_mount`; more specs to be added.
 - [ ] Scraping for films (e.g., Lomography, Film Photography Project) — **Next Step!**
 - [ ] Endpoints `/scrape/films` and `/scrape/cameras` — **Partially Completed:** `/scrape/cameras` is functional; `/scrape/films` to be implemented.
+<<<<<<< HEAD
 - [ ] Compatibility Logic (e.g., 120 film for medium format cameras): Enhance compatibility logic beyond format matching.
+=======
+>>>>>>> e8d32fe (created first scrape script)
 
 ### Phase 3: User Experience
 - User collections
