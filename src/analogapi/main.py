@@ -1,4 +1,3 @@
-# src/analogapi/main.py
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from sqlalchemy.orm import configure_mappers

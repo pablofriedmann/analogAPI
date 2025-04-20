@@ -1,4 +1,3 @@
-# src/analogapi/scrapers/scrape_films.py
 import requests
 import re
 from bs4 import BeautifulSoup
@@ -9,255 +8,304 @@ import time
 import urllib3
 from datetime import datetime
 
-# Disable SSL warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-def is_not_a_film(film_name, film_url):
-    """
-    Determines if the page is not a specific film stock (e.g., a category, camera, or unrelated page).
-    """
-    name_lower = film_name.lower()
-    url_lower = film_url.lower()
-    # Excluir páginas que son categorías o contienen palabras relacionadas con cámaras
-    if any(keyword in name_lower for keyword in ["camera", "category", "template", "format", "encoding", "instamatic", "box", "flex", "reflex", "bessa", "brownie"]):
-        return True
-    if any(keyword in url_lower for keyword in ["camera", "category"]):
-        return True
-    # Excluir nombres que no parezcan películas (e.g., solo números o sin "film")
-    if name_lower.isdigit() or ("film" not in name_lower and "color" not in name_lower and "negative" not in name_lower):
-        return True
-    return False
+def scrape_films(max_films=100):
+    
+    max_films = max(max_films, 1)
 
-def scrape_films(max_films_per_category=10, max_categories=None, max_category_pages=1):
-    """
-    Scrapes analog films from specific brand categories on Camera-wiki.org.
-    Args:
-        max_films_per_category (int): Maximum number of films to scrape per category.
-        max_categories (int): Maximum number of categories to scrape.
-        max_category_pages (int): Maximum number of subcategory pages to process.
-    Returns:
-        list: List of dictionaries with the scraped film data.
-    """
-    max_categories = max_categories if max_categories is not None else 10
-    max_films_per_category = max(max_films_per_category, 1)
-
-    # Define categories based on film brands
-    film_categories = [
-        "https://camera-wiki.org/wiki/Category:Kodak",
-        "https://camera-wiki.org/wiki/Category:Ilford",
-        "https://camera-wiki.org/wiki/Category:Fujifilm",
-        "https://camera-wiki.org/wiki/Category:Agfa",
-        "https://camera-wiki.org/wiki/Category:Foma",
-        "https://camera-wiki.org/wiki/Category:Konica",
-        "https://camera-wiki.org/wiki/Category:Orwo",
-        "https://camera-wiki.org/wiki/Category:Adox",
-    ]
-
+    url = "https://en.wikipedia.org/wiki/List_of_photographic_films"
     headers = {
         "User-Agent": "AnalogAPI-Scraper/1.0 (pablofriedmann; https://github.com/pablofriedmann/analogAPI)"
     }
-    delay = 1  # Delay between requests
-
-    categories = []
-    for category_url in film_categories:
-        try:
-            response = requests.get(category_url, headers=headers, timeout=5, verify=False)
-            response.raise_for_status()
-            categories.append(category_url)
-        except requests.RequestException as e:
-            print(f"Error accessing category {category_url}: {e}")
-            continue
-        time.sleep(delay)
-
-    categories = categories[:max_categories]
-    print(f"Found {len(categories)} categories: {categories}")
+    delay = 1 
 
     all_films = []
-    categories_processed = 0
-    known_brands = ["Kodak", "Ilford", "Fujifilm", "Polaroid", "Agfa", "Foma", "Konica", "Orwo", "Adox"]
 
-    for category_url in categories:
-        if categories_processed >= max_categories:
-            break
+    try:
+        response = requests.get(url, headers=headers, timeout=5)
+        response.raise_for_status()
+    except requests.RequestException as e:
+        print(f"Error accessing {url}: {e}")
+        return all_films
 
-        print(f"Scraping category: {category_url}")
-        category_films = []
-        current_url = category_url
-        page_count = 0
+    soup = BeautifulSoup(response.text, "html.parser")
+    tables = soup.find_all("table", class_="wikitable")
 
-        while current_url and len(category_films) < max_films_per_category and page_count < max_category_pages:
+    film_count = 0
+    for table in tables:
+        rows = table.find_all("tr")[1:]
+        for row in rows:
+            if film_count >= max_films:
+                break
+
+            cells = row.find_all("td")
+            if len(cells) < 8:
+                continue
+
             try:
-                response = requests.get(current_url, headers=headers, timeout=5, verify=False)
-                response.raise_for_status()
-            except requests.RequestException as e:
-                print(f"Error accessing {current_url}: {e}")
-                break
+                extracted_maker = cells[0].get_text(strip=True)
+                extracted_film_name = cells[1].get_text(strip=True)
+             
+                type_film = cells[4].get_text(strip=True).lower()
+                process = cells[5].get_text(strip=True)
+                iso = cells[6].get_text(strip=True)
+                formats = cells[7].get_text(strip=True).lower() 
+                grain = cells[8].get_text(strip=True).lower() if len(cells) > 8 else "Unknown" 
 
-            soup = BeautifulSoup(response.text, "html.parser")
-            film_links = soup.select("div#mw-pages li a")
-            if not film_links:
-                print(f"No films found in {current_url}")
-                break
+                print(f"Extracted maker: {extracted_maker}")
+                print(f"Extracted film_name: {extracted_film_name}")
+                print(f"Type: {type_film}")
+                print(f"Process: {process}")
+                print(f"ISO: {iso}")
+                print(f"Formats: {formats}")
+                print(f"Grain: {grain}")
 
-            print(f"Found {len(film_links)} film links in {current_url}")
+                brand = extracted_maker if extracted_maker else "Unknown"
+                name = extracted_film_name if extracted_film_name else "Unknown"
 
-            for link in film_links:
-                if len(category_films) >= max_films_per_category:
-                    break
+                brand = brand.strip().title()
+                brand_corrections = {
+                    "Fujifilm": ["Fujifilm", "Fuji", "Fujicolor"],
+                    "Agfa": ["Agfa", "Agfa Photo", "Agfaphoto"],
+                    "Ilford": ["Ilford", "Ilford Photo"],
+                    "Adox": ["Adox"],
+                    "Foma": ["Foma"],
+                    "Konica": ["Konica"],
+                    "Orwo": ["Orwo", "Original Wolfen", "Wolfen"],
+                    "Polaroid": ["Polaroid"],
+                    "Kodak": ["Kodak"],
+                    "Cinestill": ["Cinestill"],
+                    "Dubblefilm": ["Dubblefilm"],
+                    "Film Washi": ["Film Washi"],
+                    "Flic Film": ["Flic Film", "Flicfilm"],
+                    "Harman": ["Harman"],
+                    "Holga": ["Holga"],
+                    "Jch": ["Jch"],
+                    "Kentmere": ["Kentmere"],
+                    "Kono!": ["Kono!", "Kono"],
+                    "Kosmo Foto": ["Kosmo Foto"],
+                    "Lomography": ["Lomography"],
+                    "Lucky": ["Lucky"],
+                    "Oriental": ["Oriental"],
+                    "Rera": ["Rera"],
+                    "Revolog": ["Revolog", "Revelog"],
+                    "Rollei": ["Rollei"],
+                    "Sfl": ["Sfl"],
+                    "Shanghai": ["Shanghai"],
+                    "Silberra": ["Silberra"],
+                    "Spur": ["Spur"],
+                    "Svema": ["Svema"],
+                    "Tasma": ["Tasma"],
+                    "Ultrafine": ["Ultrafine"],
+                    "Vibe": ["Vibe"],
+                    "Yodica": ["Yodica"],
+                }
 
-                film_url = "https://camera-wiki.org" + link["href"]
-                film_name = link.get_text(strip=True)
+                normalized_brand = "Unknown"
+                for known_brand, aliases in brand_corrections.items():
+                    if any(alias.lower() in brand.lower() for alias in aliases):
+                        normalized_brand = known_brand
+                        break
+                brand = normalized_brand
+                if brand == "Unknown":
+                    brand = extracted_maker.strip().title()
 
-                if is_not_a_film(film_name, film_url):
-                    print(f"Skipping non-film page: {film_name} ({film_url})")
-                    continue
+                print(f"Assigned brand: {brand}")
+                print(f"Assigned name: {name}")
 
-                try:
-                    film_response = requests.get(film_url, headers=headers, timeout=5, verify=False)
-                    film_response.raise_for_status()
-                    film_soup = BeautifulSoup(film_response.text, "html.parser")
+                color = "Unknown"
+                name_cleaned = name.replace(" ", "").lower()
+                type_film_cleaned = type_film.replace(" ", "").lower()
+                process_cleaned = process.replace(" ", "").lower()
+                print(f"type_film_cleaned: {type_film_cleaned}")
+                print(f"process_cleaned: {process_cleaned}")
+                if ("colornegative" in type_film_cleaned or 
+                    "colorreversal" in type_film_cleaned or 
+                    "colorslide" in type_film_cleaned or 
+                    "color" in type_film_cleaned or 
+                    "color" in name_cleaned or 
+                    "c-41" in process_cleaned or 
+                    "e-6" in process_cleaned):
+                    color = "Color"
+                elif ("blackandwhite" in type_film_cleaned or 
+                      "b&w" in type_film_cleaned or 
+                      "b/w" in type_film_cleaned or 
+                      "monochrome" in type_film_cleaned or 
+                      "b&w" in name_cleaned or 
+                      "b/w" in name_cleaned or 
+                      "b&w" in process_cleaned or 
+                      "b/w" in process_cleaned):
+                    color = "Black and White"
 
-                    format = "Unknown"
+                if "slidefilm" in type_film_cleaned or "slide" in name_cleaned:
+                    color = "Slide Film"
+                elif "cinefilm" in type_film_cleaned or "cine" in name_cleaned or "motionpicture" in type_film_cleaned or "motionpicture" in name_cleaned:
+                    color = "Cine Film"
+
+                if color == "Unknown":
+                    link = cells[0].find("a") 
+                    if link and "href" in link.attrs:
+                        brand_page_url = "https://en.wikipedia.org" + link["href"]
+                        try:
+                            brand_page_response = requests.get(brand_page_url, headers=headers, timeout=5)
+                            brand_page_response.raise_for_status()
+                            brand_soup = BeautifulSoup(brand_page_response.text, "html.parser")
+                            brand_page_text = brand_soup.get_text().replace(" ", "").lower()
+                            print(f"Searching color in brand page text: {brand_page_text[:100]}...")
+                            if "colornegative" in brand_page_text or "colorreversal" in brand_page_text or "colorslide" in brand_page_text or "color" in brand_page_text or "c-41" in brand_page_text or "e-6" in brand_page_text:
+                                color = "Color"
+                            elif "blackandwhite" in brand_page_text or "b&w" in brand_page_text or "b/w" in brand_page_text or "monochrome" in brand_page_text:
+                                color = "Black and White"
+                        except Exception as e:
+                            print(f"Error accessing brand page {brand_page_url}: {e}")
+
+                iso_value = "Unknown"
+                iso_match = re.search(r'\d+', iso)
+                if iso_match:
+                    iso_value = iso_match.group()
+
+                if iso_value == "Unknown":
+                    formats_cleaned = formats.replace(" ", "").lower()
+                    iso_match = re.search(r'iso\s*(\d+)', formats_cleaned)
+                    if iso_match:
+                        iso_value = iso_match.group(1)
+
+                if iso_value == "Unknown":
+                    name_cleaned = name.replace(" ", "").lower()
+                    iso_match = re.search(r'\d+', name_cleaned)
+                    if iso_match:
+                        iso_value = iso_match.group()
+
+                if iso_value == "Unknown":
+                    link = cells[0].find("a") 
+                    if link and "href" in link.attrs:
+                        brand_page_url = "https://en.wikipedia.org" + link["href"]
+                        try:
+                            brand_page_response = requests.get(brand_page_url, headers=headers, timeout=5)
+                            brand_page_response.raise_for_status()
+                            brand_soup = BeautifulSoup(brand_page_response.text, "html.parser")
+                            brand_page_text = brand_soup.get_text().replace(" ", "").lower()
+                            iso_match = re.search(r'iso\s*(\d+)', brand_page_text)
+                            if iso_match:
+                                iso_value = iso_match.group(1)
+                        except Exception as e:
+                            print(f"Error accessing brand page for ISO {brand_page_url}: {e}")
+
+                format_value = "Unknown"
+                format_list = [f.strip() for f in formats.split(",")]
+                desired_formats = ["35mm", "120", "110", "126", "127", "Instant"]
+                for fmt in format_list:
+                    fmt_cleaned = fmt.replace(" ", "").lower()
+                    print(f"Checking format: {fmt_cleaned}")
+                    if "35mm" in fmt_cleaned or "35 mm" in fmt_cleaned:
+                        format_value = "35mm"
+                        break
+                    elif "120" in fmt_cleaned:
+                        format_value = "120"
+                        break
+                    elif "110" in fmt_cleaned:
+                        format_value = "110"
+                        break
+                    elif "126" in fmt_cleaned:
+                        format_value = "126"
+                        break
+                    elif "127" in fmt_cleaned:
+                        format_value = "127"
+                        break
+                    elif "instant" in fmt_cleaned or "polaroid" in fmt_cleaned:
+                        format_value = "Instant"
+                        break
+                    elif "sheetfilm" in fmt_cleaned or "largeformat" in fmt_cleaned:
+                        format_value = "Large Format"
+                        break
+
+                if format_value == "Unknown":
+                    formats_cleaned = formats.replace(" ", "").lower()
+                    if "35mm" in formats_cleaned or "35 mm" in formats_cleaned:
+                        format_value = "35mm"
+                    elif "120" in formats_cleaned:
+                        format_value = "120"
+                    elif "110" in formats_cleaned:
+                        format_value = "110"
+                    elif "126" in formats_cleaned:
+                        format_value = "126"
+                    elif "127" in formats_cleaned:
+                        format_value = "127"
+                    elif "instant" in formats_cleaned or "polaroid" in formats_cleaned:
+                        format_value = "Instant"
+                    elif "sheetfilm" in formats_cleaned or "largeformat" in formats_cleaned:
+                        format_value = "Large Format"
+
+                if format_value == "Unknown":
+                    link = cells[0].find("a")  
+                    if link and "href" in link.attrs:
+                        brand_page_url = "https://en.wikipedia.org" + link["href"]
+                        try:
+                            brand_page_response = requests.get(brand_page_url, headers=headers, timeout=5)
+                            brand_page_response.raise_for_status()
+                            brand_soup = BeautifulSoup(brand_page_response.text, "html.parser")
+                            brand_page_text = brand_soup.get_text().replace(" ", "").lower()
+                            print(f"Searching format in brand page text: {brand_page_text[:100]}...")
+                            if "35mm" in brand_page_text or "35 mm" in brand_page_text:
+                                format_value = "35mm"
+                            elif "120" in brand_page_text:
+                                format_value = "120"
+                            elif "110" in brand_page_text:
+                                format_value = "110"
+                            elif "126" in brand_page_text:
+                                format_value = "126"
+                            elif "127" in brand_page_text:
+                                format_value = "127"
+                            elif "instant" in brand_page_text or "polaroid" in brand_page_text:
+                                format_value = "Instant"
+                            elif "sheetfilm" in brand_page_text or "largeformat" in brand_page_text:
+                                format_value = "Large Format"
+                        except Exception as e:
+                            print(f"Error accessing brand page {brand_page_url}: {e}")
+
+                grain_value = "Unknown"
+                if "fine" in grain or "very fine" in grain:
+                    grain_value = "Fine"
+                elif "medium" in grain or "medium-fine" in grain:
+                    grain_value = "Medium"
+                elif "coarse" in grain:
+                    grain_value = "Coarse"
+
+                if format_value == "Unknown":
+                    format_value = "Unknown"
+
+                if color == "Unknown":
                     color = "Unknown"
-                    iso = None
-                    grain = "Unknown"
 
-                    # Intentar inferir el formato desde el nombre o URL
-                    name_lower = film_name.lower()
-                    if "35mm" in name_lower or "35mm" in film_url.lower():
-                        format = "35mm"
-                    elif "120" in name_lower or "120" in film_url.lower():
-                        format = "120"
-                    elif "110" in name_lower or "110" in film_url.lower():
-                        format = "110"
-                    elif "126" in name_lower or "126" in film_url.lower():
-                        format = "126"
-                    elif "127" in name_lower or "127" in film_url.lower():
-                        format = "127"
-                    elif "instant" in name_lower or "polaroid" in name_lower or "sx-70" in name_lower:
-                        format = "Instant"
+                film_data = {
+                    "brand": brand,   
+                    "name": name,         
+                    "format": format_value,
+                    "color": color,
+                    "iso": iso_value,
+                    "grain": grain_value,
+                    "source_url": url
+                }
+                all_films.append(film_data)
+                film_count += 1
+                print(f"Successfully scraped film: {film_data['brand']} {film_data['name']} from {url}")
+                print(f"Film data: {film_data}")
 
-                    content = film_soup.select_one("div#mw-content-text")
-                    if content:
-                        infobox = content.select_one("table.infobox")
-                        if infobox:
-                            rows = infobox.select("tr")
-                            for row in rows:
-                                cells = row.select("td")
-                                if len(cells) >= 2:
-                                    label = cells[0].get_text(strip=True).lower()
-                                    value = cells[1].get_text(strip=True).lower()
-                                    if "format" in label and format == "Unknown":
-                                        if "35mm" in value:
-                                            format = "35mm"
-                                        elif "120" in value:
-                                            format = "120"
-                                        elif "110" in value:
-                                            format = "110"
-                                        elif "126" in value:
-                                            format = "126"
-                                        elif "127" in value:
-                                            format = "127"
-                                        elif "instant" in value:
-                                            format = "Instant"
-                                    if "type" in label or "color" in label:
-                                        if "color" in value:
-                                            color = "Color"
-                                        elif "black and white" in value or "b&w" in value or "monochrome" in value:
-                                            color = "Black and White"
-                                    if "iso" in label or "speed" in label:
-                                        iso = int(re.search(r'\d+', value).group()) if re.search(r'\d+', value) else None
-                                    if "grain" in label:
-                                        grain = value.title()
+            except Exception as e:
+                print(f"Error processing film row: {e}")
+                continue
 
-                        paragraphs = content.select("p")
-                        for p in paragraphs:
-                            text = p.get_text(strip=True).lower()
-                            if "format" in text and format == "Unknown":
-                                if "35mm" in text:
-                                    format = "35mm"
-                                elif "medium format" in text or "120" in text:
-                                    format = "120"
-                                elif "110" in text:
-                                    format = "110"
-                                elif "126" in text:
-                                    format = "126"
-                                elif "127" in text:
-                                    format = "127"
-                                elif "instant" in text or "polaroid" in text or "sx-70" in text:
-                                    format = "Instant"
-                            if ("type" in text or "color" in text) and color == "Unknown":
-                                if "color" in text:
-                                    color = "Color"
-                                elif "black and white" in text or "b&w" in text or "monochrome" in text:
-                                    color = "Black and White"
-                            if ("iso" in text or "speed" in text) and not iso:
-                                iso_match = re.search(r'iso\s+(\d+)', text)
-                                if iso_match:
-                                    iso = int(iso_match.group(1))
-                            if "grain" in text and grain == "Unknown":
-                                if "fine" in text:
-                                    grain = "Fine"
-                                elif "medium" in text:
-                                    grain = "Medium"
-                                elif "coarse" in text:
-                                    grain = "Coarse"
-
-                    desired_formats = ["35mm", "120", "110", "126", "127", "Instant"]
-                    if format != "Unknown" and not any(desired_format in format for desired_format in desired_formats):
-                        print(f"Skipping film with non-desired format: {film_name} (format: {format})")
-                        continue
-
-                    name_parts = film_name.split(" ", 1)
-                    brand = name_parts[0] if name_parts[0] in known_brands else "Unknown"
-                    name = name_parts[1] if len(name_parts) > 1 and name_parts[0] in known_brands else film_name
-
-                    if brand.isdigit() or "camera" in name.lower():
-                        print(f"Skipping film with invalid brand or name: {film_name} ({film_url})")
-                        continue
-
-                    if not iso:
-                        print(f"Skipping film without ISO: {film_name} ({film_url})")
-                        continue
-
-                    film_data = {
-                        "brand": brand,
-                        "name": name,
-                        "format": format,
-                        "color": color,
-                        "iso": iso,
-                        "grain": grain,
-                        "source_url": film_url
-                    }
-                    category_films.append(film_data)
-                    print(f"Successfully scraped film: {brand} {name} from {film_url}")
-                    print(f"Film data: {film_data}")
-
-                except requests.RequestException as e:
-                    print(f"Error scraping {film_url}: {e}")
-                    continue
-                except Exception as e:
-                    print(f"Unexpected error while processing {film_url}: {e}")
-                    continue
-
-                time.sleep(delay)
-
-            next_page = soup.select_one("a[href*='pagefrom']")
-            current_url = "https://camera-wiki.org" + next_page["href"] if next_page else None
-            page_count += 1
             time.sleep(delay)
 
-        if category_films:
-            categories_processed += 1
-        all_films.extend(category_films)
-        print(f"Category {category_url} yielded {len(category_films)} films")
+        if film_count >= max_films:
+            break
 
-    print(f"Processed {categories_processed} categories with films")
     print(f"Total films scraped: {len(all_films)}")
     return all_films
 
 def save_scraped_films(db: Session, films: list):
-    valid_formats = ["35mm", "120", "110", "126", "127", "Instant"]
+    valid_formats = ["35mm", "120", "110", "126", "127", "Instant", "Large Format", "Unknown"]
     saved_films = 0
     try:
         print(f"Attempting to save {len(films)} films")

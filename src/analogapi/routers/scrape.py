@@ -1,9 +1,8 @@
- # src/analogapi/routers/scrape.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..scrapers.scrape_cameras import scrape_cameras, save_scraped_cameras
-from ..scrapers.scrape_films import scrape_films, save_scraped_films 
+from ..scrapers.scrape_films import scrape_films, save_scraped_films
 
 router = APIRouter(
     prefix="/scrape",
@@ -31,17 +30,14 @@ def scrape_and_save_cameras(
 
 @router.post("/films")
 def scrape_and_save_films(
-    max_films_per_category: int = 10,
-    max_categories: int = 10,
+    max_films: int = 100,  # Cambiado a max_films
     db: Session = Depends(get_db)
 ):
-    if max_films_per_category <= 0:
-        raise HTTPException(status_code=400, detail="max_films_per_category must be a positive integer")
-    if max_categories <= 0:
-        raise HTTPException(status_code=400, detail="max_categories must be a positive integer")
+    if max_films <= 0:
+        raise HTTPException(status_code=400, detail="max_films must be a positive integer")
 
     try:
-        films = scrape_films(max_films_per_category, max_categories)
+        films = scrape_films(max_films)
         save_scraped_films(db, films)
         return {"message": f"Scraped and saved {len(films)} films"}
     except Exception as e:

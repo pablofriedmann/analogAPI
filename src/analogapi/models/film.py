@@ -1,4 +1,3 @@
-# src/analogapi/models/film.py
 from sqlalchemy import Column, Integer, String, DateTime, Table, ForeignKey
 from sqlalchemy.orm import relationship
 from ..base import Base
@@ -17,12 +16,12 @@ class Film(Base):
     id = Column(Integer, primary_key=True, index=True)
     brand = Column(String, nullable=False)
     name = Column(String, nullable=False)
-    iso = Column(Integer)
+    iso = Column(String, nullable=True) 
     format = Column(String)
     color = Column(String)
     grain = Column(String)
     source_url = Column(String)
-    scraped_at = Column(DateTime, default=datetime.utcnow)
+    scraped_at = Column(DateTime(timezone=True))
 
     tags = relationship("Tag", secondary="film_tags", back_populates="films")
     favorite_users = relationship("User", secondary=favorite_films, back_populates="favorite_films")
