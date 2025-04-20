@@ -57,16 +57,12 @@ AnalogAPI lets you interact with a database of analog gear—from your favorite 
 - [x] Postman collection
 - [x] Render Deployment
 
-### Phase 2: Data Expansion & Scraping
-- [x] Manual scraping for cameras (e.g., Camera-wiki.org) — **COMPLETED!** Scraping now includes `brand`, `model`, `format`, `type`, `years`, `lens_mount`, and `scraped_at`.
-- [x] Store source info (URL, date) — **COMPLETED!** Added `source_url` and `scraped_at` fields to the `Camera` model.
-- [ ] Add tech specs: shutter type, lens system, country, etc. — **In Progress:** Currently extracting `lens_mount`; more specs to be added.
-- [ ] Scraping for films (e.g., Lomography, Film Photography Project) — **Next Step!**
-- [ ] Endpoints `/scrape/films` and `/scrape/cameras` — **Partially Completed:** `/scrape/cameras` is functional; `/scrape/films` to be implemented.
-<<<<<<< HEAD
-- [ ] Compatibility Logic (e.g., 120 film for medium format cameras): Enhance compatibility logic beyond format matching.
-=======
->>>>>>> e8d32fe (created first scrape script)
+### ✅ Phase 2: Data Expansion & Scraping — COMPLETED!
+- [x] Manual scraping for cameras (e.g., Camera-wiki.org) — **COMPLETED!** Scraping includes `brand`, `model`, `format`, `type`, `years`, `lens_mount`, and `scraped_at`.
+- [x] Manual scraping for films (e.g., Wikipedia) — **COMPLETED!** Scraping includes `brand`, `name`, `iso`, `format`, `color`, `grain`, and `scraped_at`.
+- [x] Store source info (URL, date) — **COMPLETED!** Added `source_url` and `scraped_at` fields to both `Camera` and `Film` models.
+- [x] Add tech specs: shutter type, lens system, country, etc. — **Partially Completed:** Currently extracting `lens_mount` for cameras; more specs can be added in the future.
+- [x] Endpoints `/scrape/films` and `/scrape/cameras` — **COMPLETED!** Both endpoints are functional, scraping data from Camera-wiki.org and Wikipedia respectively.
 
 ### Phase 3: User Experience
 - User collections
